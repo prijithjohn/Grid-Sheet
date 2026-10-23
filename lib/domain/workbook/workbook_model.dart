@@ -39,6 +39,14 @@ class Workbook {
     }
   }
 
+  /// Factory creating an untitled workbook with a default "Sheet1".
+  factory Workbook.createDefault({String title = 'Untitled.gsheet'}) {
+    return Workbook(
+      id: 'wb_${DateTime.now().microsecondsSinceEpoch}',
+      title: title,
+    );
+  }
+
   /// Currently active worksheet tab.
   Worksheet get activeSheet => _sheets[_activeSheetIndex];
 
@@ -84,6 +92,32 @@ class Workbook {
       throw ArgumentError('Worksheet with name "${sheet.name}" already exists');
     }
     _sheets.add(sheet);
+  }
+
+  /// Inserts an existing [sheet] at [index] in the workbook.
+  ///
+  /// Throws [RangeError] if [index] is out of range.
+  /// Throws [ArgumentError] if a sheet with the same name already exists.
+  void insertSheet(int index, Worksheet sheet) {
+    if (index < 0 || index > _sheets.length) {
+      throw RangeError.range(index, 0, _sheets.length, 'index');
+    }
+    if (containsSheetName(sheet.name)) {
+      throw ArgumentError('Worksheet with name "${sheet.name}" already exists');
+    }
+    _sheets.insert(index, sheet);
+  }
+
+  /// Removes [sheet] from the workbook by reference.
+  ///
+  /// Returns `true` if the sheet was found and removed.
+  bool removeSheet(Worksheet sheet) {
+    final idx = _sheets.indexOf(sheet);
+    if (idx != -1) {
+      removeSheetAt(idx);
+      return true;
+    }
+    return false;
   }
 
   /// Renames the worksheet at [index] to [newName].

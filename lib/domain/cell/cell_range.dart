@@ -26,11 +26,27 @@ class CellRange {
   final int rightCol;
 
   /// Creates a [CellRange] defined by [start] and [end] coordinates.
+  ///
+  /// Normalizes bounds automatically so that [topRow] <= [bottomRow] and [leftCol] <= [rightCol].
   CellRange(this.start, this.end)
     : topRow = math.min(start.row, end.row),
       bottomRow = math.max(start.row, end.row),
       leftCol = math.min(start.col, end.col),
       rightCol = math.max(start.col, end.col);
+
+  /// Creates a [CellRange] with explicit, pre-normalized bounds.
+  ///
+  /// Use this const-compatible constructor when bounds are known at compile-time
+  /// and are already in normalized form (topRow <= bottomRow, leftCol <= rightCol).
+  const CellRange.normalized({
+    required this.start,
+    required this.end,
+    required this.topRow,
+    required this.bottomRow,
+    required this.leftCol,
+    required this.rightCol,
+  }) : assert(topRow <= bottomRow),
+       assert(leftCol <= rightCol);
 
   /// Creates a 1x1 [CellRange] covering a single [coordinate].
   CellRange.single(CellCoordinate coordinate)
@@ -101,12 +117,17 @@ class CellRange {
   /// Formats this range in standard A1 range notation (e.g. `"A1:B10"`).
   ///
   /// If the range is a single cell, returns the single cell coordinate (e.g. `"A1"`).
+  /// Note: this uses [start] and [end] directly; for normalized output use the
+  /// normalized fields [topRow], [bottomRow], [leftCol], [rightCol] instead.
   String toA1({bool includeAnchors = true}) {
     if (isSingleCell) {
       return start.toA1(includeAnchors: includeAnchors);
     }
     return '${start.toA1(includeAnchors: includeAnchors)}:${end.toA1(includeAnchors: includeAnchors)}';
   }
+
+  /// Shorthand getter returning standard A1 range notation without anchors.
+  String get a1 => toA1(includeAnchors: false);
 
   /// Returns true if this range encloses the given [coordinate].
   bool contains(CellCoordinate coordinate) {

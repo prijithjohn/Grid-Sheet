@@ -10,12 +10,12 @@ gantt
     dateFormat  YYYY-MM-DD
     section Setup
     Phase 00: Audit & Structure Setup       :done,    p0, 2026-10-23, 1d
-    section Core Engine
+    section Core Engine & State
     Phase 01: Domain Model & Coordinates    :done,    p1, after p0, 2d
-    Phase 02: Formula Parser & DAG Engine   :active,  p2, after p1, 3d
+    Phase 02: Application State & Commands  :active,  p2, after p1, 2d
+    Phase 03: Formula Parser & DAG Engine   :         p3, after p2, 3d
     section Presentation
-    Phase 03: Virtualized Canvas Grid       :         p3, after p2, 4d
-    Phase 04: Command Pattern & Undo/Redo   :         p4, after p3, 2d
+    Phase 04: Virtualized Canvas Grid       :         p4, after p3, 4d
     Phase 05: Formula Bar & Sheet Strip UI  :         p5, after p4, 3d
     Phase 06: Ribbon Bar & Cell Formatting  :         p6, after p5, 3d
     section Data & Tools
@@ -56,12 +56,26 @@ gantt
 - **Unit Tests**: Full coordinate math tests, range intersection/containment tests, sparse matrix memory benchmarks (73 domain tests + 1 isolation test).
 - **Completion Condition**: 100% test pass rate on all coordinate and sparse worksheet unit tests. (Verified & Complete)
 
+---
+
+### Phase 02: Application State and Commands (Current Phase)
+- **Primary Goal**: Implement the reactive application state manager, selection/navigation state, and the reversible Command pattern execution engine (Undo/Redo) for workbook and worksheet mutations.
+- **Dependencies**: Phase 01.
+- **Key Modules**:
+  - `lib/core/commands/command.dart`: Abstract `Command` contract with `execute()`, `undo()`, `canExecute`, and descriptive action labels.
+  - `lib/core/commands/command_stack.dart`: Reversible history manager with configurable undo/redo depth and state change listeners.
+  - `lib/core/commands/cell_commands.dart`: `SetCellTextCommand`, `ClearRangeCommand`, `FormatRangeCommand`.
+  - `lib/core/commands/worksheet_commands.dart`: `AddWorksheetCommand`, `RemoveWorksheetCommand`, `RenameWorksheetCommand`, `ReorderWorksheetCommand`, `ResizeColumnCommand`, `ResizeRowCommand`.
+  - `lib/app/state/selection_state.dart`: Active cell coordinate, primary selection range, multi-selection ranges, mode (single cell, range, entire row, entire column).
+  - `lib/app/state/workbook_state.dart`: Central reactive controller coordinating active `Workbook`, active `Worksheet`, `SelectionState`, and `CommandStack`. Notifies UI components of changes (cell edits, selection shifts, tab switches, undo/redo availability).
+- **Unit Tests**: Full suite testing command reversibility (undo/redo), state transitions, invalid/noop operations, selection boundaries, and edge cases.
+- **Completion Condition**: 100% test pass rate across command execution, undo/redo stacks, and application state transitions.
 
 ---
 
-### Phase 02: Formula Lexer, AST Parser, Dependency Graph & Evaluation Engine
+### Phase 03: Formula Lexer, AST Parser, Dependency Graph & Evaluation Engine
 - **Primary Goal**: Implement the deterministic calculation engine capable of parsing expressions, resolving cell references, detecting circular dependencies, and evaluating standard spreadsheet functions.
-- **Dependencies**: Phase 01.
+- **Dependencies**: Phase 01, Phase 02.
 - **Key Modules**:
   - `lib/domain/formula/lexer/formula_lexer.dart`: Tokenizer for arithmetic, comparisons, strings, cell references.
   - `lib/domain/formula/parser/formula_parser.dart`: Recursive descent / Pratt parser constructing `FormulaNode` AST.
@@ -73,9 +87,9 @@ gantt
 
 ---
 
-### Phase 03: Virtualized High-Density Grid Canvas & Viewport Scrolling
+### Phase 04: Virtualized High-Density Grid Canvas & Viewport Scrolling
 - **Primary Goal**: Construct the high-performance Flutter `CustomPainter` rendering visible cells, gridlines, headers, and selection rings at 60 FPS.
-- **Dependencies**: Phase 01, Phase 02.
+- **Dependencies**: Phase 02, Phase 03.
 - **Key Modules**:
   - `lib/features/grid/widgets/grid_viewport.dart`: Bi-directional scroll controllers, visible range calculator.
   - `lib/features/grid/painters/grid_painter.dart`: Custom canvas painter for cell backgrounds, gridlines, and text.
@@ -84,19 +98,6 @@ gantt
   - `lib/features/grid/widgets/row_header_strip.dart`: Row numbers (`1`, `2`, `3`...), interactive drag-resize handles.
 - **Tests**: Scroll performance widget tests, hit-testing coordinate translation tests.
 - **Completion Condition**: Grid renders up to 100,000 rows with smooth 60 FPS scrolling and zero text clipping.
-
----
-
-### Phase 04: Command Architecture, Undo/Redo & Clipboard Operations
-- **Primary Goal**: Implement the Command pattern stack for all cell modifications and system clipboard interoperability.
-- **Dependencies**: Phase 03.
-- **Key Modules**:
-  - `lib/core/commands/command.dart`: Abstract `Command` with `execute()` and `undo()`.
-  - `lib/core/commands/command_stack.dart`: History manager with configurable depth.
-  - `lib/core/commands/cell_commands.dart`: `SetCellTextCommand`, `ClearRangeCommand`, `ResizeColumnCommand`.
-  - `lib/core/utilities/clipboard_manager.dart`: TSV clipboard serializer/deserializer for system cut/copy/paste.
-- **Tests**: Reversible undo/redo tests, clipboard TSV export/import tests.
-- **Completion Condition**: 100% reversible state mutations verified across complex multi-step editing sequences.
 
 ---
 
