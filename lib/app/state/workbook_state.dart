@@ -17,8 +17,9 @@ class WorkbookState extends ChangeNotifier {
     String? filePath,
   }) : _workbook = initialWorkbook ?? Workbook.createDefault(),
        _commandStack = commandStack ?? CommandStack(),
-       _selection = initialSelection ?? SelectionState.initial,
-       _filePath = filePath;
+       _selection = initialSelection ?? SelectionState.initial {
+    _filePath = filePath;
+  }
 
   Workbook _workbook;
   final CommandStack _commandStack;

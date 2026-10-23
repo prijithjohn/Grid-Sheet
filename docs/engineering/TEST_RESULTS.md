@@ -6,6 +6,37 @@ This document records automated test suite outcomes, test counts, execution dura
 
 ## Test Execution History
 
+### Phase 02 Application State & Command Engine Verification (2026-10-23)
+- **Environment:** Windows 11 (25H2), Flutter 3.47.5, Dart 3.13.4
+- **Test Runner:** `flutter test`
+- **Results Summary:** 125 tests across 12 test suites (64 new tests added in Phase 02), 100% pass rate.
+
+| Test Suite / Target | Tests Run | Passed | Failed | Skipped | Duration | Outcome |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| `test/unit/commands/command_stack_test.dart` (Undo/Redo, Eviction, Listeners) | 14 | 14 | 0 | 0 | 0.3s | **PASS** |
+| `test/unit/commands/cell_commands_test.dart` (SetText, ClearRange, FormatRange) | 11 | 11 | 0 | 0 | 0.3s | **PASS** |
+| `test/unit/commands/worksheet_commands_test.dart` (Add, Remove, Rename, Reorder, Resize) | 13 | 13 | 0 | 0 | 0.3s | **PASS** |
+| `test/unit/state/selection_state_test.dart` (Cursors, Ranges, Disjoint, Invariants) | 13 | 13 | 0 | 0 | 0.3s | **PASS** |
+| `test/unit/state/workbook_state_test.dart` (Coordination, Mutations, Lifecycle) | 13 | 13 | 0 | 0 | 0.4s | **PASS** |
+| `test/unit/cell/cell_coordinate_test.dart` (Phase 01 Regression) | 15 | 15 | 0 | 0 | 0.3s | **PASS** |
+| `test/unit/cell/cell_range_test.dart` (Phase 01 Regression) | 16 | 16 | 0 | 0 | 0.3s | **PASS** |
+| `test/unit/cell/cell_value_and_style_test.dart` (Phase 01 Regression) | 13 | 13 | 0 | 0 | 0.3s | **PASS** |
+| `test/unit/worksheet/worksheet_model_test.dart` (Phase 01 Regression) | 15 | 15 | 0 | 0 | 0.3s | **PASS** |
+| `test/unit/workbook/workbook_model_test.dart` (Phase 01 Regression) | 13 | 13 | 0 | 0 | 0.3s | **PASS** |
+| `test/unit/domain_isolation_test.dart` (Zero-Flutter Isolation Regression) | 1 | 1 | 0 | 0 | 0.2s | **PASS** |
+| `test/widget_test.dart` (Starter Smoke) | 1 | 1 | 0 | 0 | 1.0s | **PASS** |
+| **Total Automated Tests** | **125** | **125** | **0** | **0** | **~2.8s** | **PASS** |
+
+### Static Analysis & Toolchain Quality Gates (Phase 02)
+
+| Check / Tool | Target | Result | Outcome |
+| :--- | :--- | :--- | :---: |
+| `dart format --output=none --set-exit-if-changed .` | All Dart sources and tests | 0 files changed / formatted | **PASS** |
+| `flutter analyze --no-fatal-infos` | Whole project workspace | 0 issues found | **PASS** |
+| `flutter test` | All 12 test suites | 125 passed, 0 failed | **PASS** |
+
+---
+
 ### Phase 01 Domain & Coordinate Verification (2026-10-23)
 - **Environment:** Windows 11 (25H2), Flutter 3.47.5, Dart 3.13.4
 - **Test Runner:** `flutter test` & `scripts/validate_phase.ps1`
