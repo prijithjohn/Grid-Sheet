@@ -20,6 +20,8 @@ export 'formula/formula_engine.dart';
 export 'formula/functions.dart';
 export 'formula/lexer.dart';
 export 'formula/parser.dart';
+export 'formula/reference_adjuster.dart';
 export 'formula/token.dart';
 export 'workbook/workbook_model.dart';
+export 'worksheet/worksheet_filter.dart';
 export 'worksheet/worksheet_model.dart';

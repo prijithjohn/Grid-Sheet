@@ -116,29 +116,64 @@ class _GridViewportState extends State<GridViewport> {
   }
 
   CellCoordinate? _hitTestCoordinate(Offset localOffset) {
-    final targetX = localOffset.dx + _scrollX;
-    final targetY = localOffset.dy + _scrollY;
-
     final worksheet = widget.state.activeWorksheet;
+    final frozenCols = worksheet.frozenCols;
+    final frozenRows = worksheet.frozenRows;
 
-    // Find column (0-indexed)
+    // Check frozen columns first
     double currentX = 0;
     int col = 0;
-    while (col < CellCoordinate.maxCols) {
+    bool inFrozenCol = false;
+    while (col < frozenCols) {
       final width = worksheet.getColumnWidth(col);
-      if (targetX >= currentX && targetX < currentX + width) break;
+      if (localOffset.dx >= currentX && localOffset.dx < currentX + width) {
+        inFrozenCol = true;
+        break;
+      }
       currentX += width;
       col++;
     }
 
-    // Find row (0-indexed)
+    if (!inFrozenCol) {
+      final targetX = localOffset.dx + _scrollX;
+      currentX = 0;
+      col = 0;
+      while (col < CellCoordinate.maxCols) {
+        final width = worksheet.getColumnWidth(col);
+        if (targetX >= currentX && targetX < currentX + width) break;
+        currentX += width;
+        col++;
+      }
+    }
+
+    // Check frozen rows first
     double currentY = 0;
     int row = 0;
-    while (row < CellCoordinate.maxRows) {
+    bool inFrozenRow = false;
+    while (row < frozenRows) {
       final height = worksheet.getRowHeight(row);
-      if (targetY >= currentY && targetY < currentY + height) break;
+      if (height > 0 &&
+          localOffset.dy >= currentY &&
+          localOffset.dy < currentY + height) {
+        inFrozenRow = true;
+        break;
+      }
       currentY += height;
       row++;
+    }
+
+    if (!inFrozenRow) {
+      final targetY = localOffset.dy + _scrollY;
+      currentY = 0;
+      row = 0;
+      while (row < CellCoordinate.maxRows) {
+        final height = worksheet.getRowHeight(row);
+        if (height > 0 && targetY >= currentY && targetY < currentY + height) {
+          break;
+        }
+        currentY += height;
+        row++;
+      }
     }
 
     if (col < CellCoordinate.maxCols && row < CellCoordinate.maxRows) {
@@ -162,7 +197,10 @@ class _GridViewportState extends State<GridViewport> {
     }
     final height = worksheet.getRowHeight(coord.row);
 
-    return Rect.fromLTWH(x - _scrollX, y - _scrollY, width, height);
+    final offsetX = coord.col < worksheet.frozenCols ? x : x - _scrollX;
+    final offsetY = coord.row < worksheet.frozenRows ? y : y - _scrollY;
+
+    return Rect.fromLTWH(offsetX, offsetY, width, height);
   }
 
   @override

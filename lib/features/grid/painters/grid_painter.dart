@@ -30,14 +30,32 @@ class GridPainter extends CustomPainter {
       ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke;
 
-    // Calculate visible columns (0-indexed)
-    double currentX = 0;
-    int col = 0;
-    final visibleCols = <int, double>{}; // colIndex -> startX
+    final frozenCols = worksheet.frozenCols;
+    final frozenRows = worksheet.frozenRows;
 
+    // Calculate frozen width and height
+    double frozenWidth = 0;
+    for (int c = 0; c < frozenCols; c++) {
+      frozenWidth += worksheet.getColumnWidth(c);
+    }
+    double frozenHeight = 0;
+    for (int r = 0; r < frozenRows; r++) {
+      frozenHeight += worksheet.getRowHeight(r);
+    }
+
+    // Calculate visible columns (0-indexed)
+    final visibleCols = <int, double>{};
+    double fx = 0;
+    for (int c = 0; c < frozenCols; c++) {
+      visibleCols[c] = fx;
+      fx += worksheet.getColumnWidth(c);
+    }
+
+    double currentX = fx;
+    int col = frozenCols;
     while (currentX < scrollX + viewportWidth && col < CellCoordinate.maxCols) {
       final colWidth = worksheet.getColumnWidth(col);
-      if (currentX + colWidth >= scrollX) {
+      if (currentX + colWidth >= scrollX + fx) {
         visibleCols[col] = currentX - scrollX;
       }
       currentX += colWidth;
@@ -45,61 +63,112 @@ class GridPainter extends CustomPainter {
     }
 
     // Calculate visible rows (0-indexed)
-    double currentY = 0;
-    int row = 0;
-    final visibleRows = <int, double>{}; // rowIndex -> startY
+    final visibleRows = <int, double>{};
+    double fy = 0;
+    for (int r = 0; r < frozenRows; r++) {
+      final h = worksheet.getRowHeight(r);
+      if (h > 0) {
+        visibleRows[r] = fy;
+        fy += h;
+      }
+    }
 
+    double currentY = fy;
+    int row = frozenRows;
     while (currentY < scrollY + viewportHeight &&
         row < CellCoordinate.maxRows) {
       final rowHeight = worksheet.getRowHeight(row);
-      if (currentY + rowHeight >= scrollY) {
+      if (rowHeight > 0 && currentY + rowHeight >= scrollY + fy) {
         visibleRows[row] = currentY - scrollY;
       }
       currentY += rowHeight;
       row++;
     }
 
-    // Draw cell backgrounds and gridlines
-    for (final colEntry in visibleCols.entries) {
-      final colIdx = colEntry.key;
-      final startX = colEntry.value;
+    // Draw non-frozen cells first, then frozen cells on top
+    void renderCell(int rowIdx, int colIdx, double startX, double startY) {
       final colWidth = worksheet.getColumnWidth(colIdx);
+      final rowHeight = worksheet.getRowHeight(rowIdx);
+      if (rowHeight <= 0) return;
 
+      final cellRect = Rect.fromLTWH(startX, startY, colWidth, rowHeight);
+      final coord = CellCoordinate(rowIdx, colIdx);
+      final cell = worksheet.getCell(coord);
+
+      final isFrozen = rowIdx < frozenRows || colIdx < frozenCols;
+
+      // Fill background (opaque white for frozen cells so scrolled data doesn't bleed)
+      if (cell != null && cell.style.fillColor != null) {
+        final fillPaint = Paint()
+          ..color = Color(cell.style.fillColor!)
+          ..style = PaintingStyle.fill;
+        canvas.drawRect(cellRect, fillPaint);
+      } else if (isFrozen) {
+        final bgPaint = Paint()
+          ..color = AppColors.canvasWhite
+          ..style = PaintingStyle.fill;
+        canvas.drawRect(cellRect, bgPaint);
+      }
+
+      // Draw 1px bottom and right gridlines
+      canvas.drawLine(
+        Offset(startX, startY + rowHeight),
+        Offset(startX + colWidth, startY + rowHeight),
+        gridlinePaint,
+      );
+      canvas.drawLine(
+        Offset(startX + colWidth, startY),
+        Offset(startX + colWidth, startY + rowHeight),
+        gridlinePaint,
+      );
+
+      // Draw cell text
+      if (cell != null && cell.formattedText.isNotEmpty) {
+        _drawCellText(canvas, cell, cellRect);
+      }
+    }
+
+    // 1. Scrolled body cells
+    for (final colEntry in visibleCols.entries) {
+      if (colEntry.key < frozenCols) continue;
       for (final rowEntry in visibleRows.entries) {
-        final rowIdx = rowEntry.key;
-        final startY = rowEntry.value;
-        final rowHeight = worksheet.getRowHeight(rowIdx);
+        if (rowEntry.key < frozenRows) continue;
+        renderCell(rowEntry.key, colEntry.key, colEntry.value, rowEntry.value);
+      }
+    }
 
-        final cellRect = Rect.fromLTWH(startX, startY, colWidth, rowHeight);
-
-        // Check if cell has content
-        final coord = CellCoordinate(rowIdx, colIdx);
-        final cell = worksheet.getCell(coord);
-
-        if (cell != null && cell.style.fillColor != null) {
-          final fillPaint = Paint()
-            ..color = Color(cell.style.fillColor!)
-            ..style = PaintingStyle.fill;
-          canvas.drawRect(cellRect, fillPaint);
-        }
-
-        // Draw 1px bottom and right gridlines
-        canvas.drawLine(
-          Offset(startX, startY + rowHeight),
-          Offset(startX + colWidth, startY + rowHeight),
-          gridlinePaint,
-        );
-        canvas.drawLine(
-          Offset(startX + colWidth, startY),
-          Offset(startX + colWidth, startY + rowHeight),
-          gridlinePaint,
-        );
-
-        // Draw cell text if populated
-        if (cell != null && cell.formattedText.isNotEmpty) {
-          _drawCellText(canvas, cell, cellRect);
+    // 2. Frozen rows and columns on top
+    for (final colEntry in visibleCols.entries) {
+      for (final rowEntry in visibleRows.entries) {
+        if (colEntry.key < frozenCols || rowEntry.key < frozenRows) {
+          renderCell(
+            rowEntry.key,
+            colEntry.key,
+            colEntry.value,
+            rowEntry.value,
+          );
         }
       }
+    }
+
+    // 3. Draw freeze split borders
+    final freezeBorderPaint = Paint()
+      ..color = AppColors.neutralBorder
+      ..strokeWidth = 2.0;
+
+    if (frozenRows > 0 && frozenHeight > 0) {
+      canvas.drawLine(
+        Offset(0, frozenHeight),
+        Offset(viewportWidth, frozenHeight),
+        freezeBorderPaint,
+      );
+    }
+    if (frozenCols > 0 && frozenWidth > 0) {
+      canvas.drawLine(
+        Offset(frozenWidth, 0),
+        Offset(frozenWidth, viewportHeight),
+        freezeBorderPaint,
+      );
     }
   }
 

@@ -65,6 +65,12 @@ class WorkbookSerializer {
         (k, v) => MapEntry(k.toString(), v),
       );
     }
+    if (sheet.frozenRows > 0) {
+      json['frozenRows'] = sheet.frozenRows;
+    }
+    if (sheet.frozenCols > 0) {
+      json['frozenCols'] = sheet.frozenCols;
+    }
 
     return json;
   }
@@ -276,6 +282,12 @@ class WorkbookSerializer {
           sheet.setRowHeight(row, height);
         }
       }
+    }
+
+    final frozenRows = (json['frozenRows'] as num?)?.toInt() ?? 0;
+    final frozenCols = (json['frozenCols'] as num?)?.toInt() ?? 0;
+    if (frozenRows > 0 || frozenCols > 0) {
+      sheet.freezePanes(rows: frozenRows, cols: frozenCols);
     }
 
     return sheet;

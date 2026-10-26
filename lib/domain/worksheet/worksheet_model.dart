@@ -43,6 +43,18 @@ class Worksheet {
   /// Custom row heights in logical pixels: row index -> height.
   final Map<int, double> _customRowHeights = {};
 
+  /// Set of 0-indexed rows that are hidden (e.g. filtered or hidden by user).
+  final Set<int> _hiddenRows = {};
+
+  /// Number of frozen rows anchored at the top of the worksheet (0 = none).
+  int frozenRows = 0;
+
+  /// Number of frozen columns anchored at the left of the worksheet (0 = none).
+  int frozenCols = 0;
+
+  /// Optional active tabular filter configuration for this worksheet.
+  dynamic filter;
+
   Worksheet({required this.id, required String name})
     : _name = validateName(name);
 
@@ -195,8 +207,43 @@ class Worksheet {
   }
 
   /// Retrieves the height of row [rowIndex] in logical pixels.
+  ///
+  /// Returns 0.0 if the row is currently hidden or filtered out.
   double getRowHeight(int rowIndex) {
+    if (isRowHidden(rowIndex)) return 0.0;
     return _customRowHeights[rowIndex] ?? defaultRowHeight;
+  }
+
+  /// Whether row [rowIndex] is currently hidden (e.g. filtered out).
+  bool isRowHidden(int rowIndex) => _hiddenRows.contains(rowIndex);
+
+  /// Sets whether row [rowIndex] is hidden.
+  void setRowHidden(int rowIndex, bool hidden) {
+    if (hidden) {
+      _hiddenRows.add(rowIndex);
+    } else {
+      _hiddenRows.remove(rowIndex);
+    }
+  }
+
+  /// Clears all hidden rows on this worksheet.
+  void clearHiddenRows() {
+    _hiddenRows.clear();
+  }
+
+  /// Set of all currently hidden 0-indexed row indices.
+  Set<int> get hiddenRows => Set.unmodifiable(_hiddenRows);
+
+  /// Sets the frozen row and column boundaries.
+  void freezePanes({int rows = 0, int cols = 0}) {
+    frozenRows = rows.clamp(0, 50);
+    frozenCols = cols.clamp(0, 30);
+  }
+
+  /// Unfreezes all rows and columns.
+  void unfreezePanes() {
+    frozenRows = 0;
+    frozenCols = 0;
   }
 
   /// Sets the custom height of row [rowIndex] in logical pixels.
