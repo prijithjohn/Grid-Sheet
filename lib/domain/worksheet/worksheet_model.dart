@@ -130,13 +130,19 @@ class Worksheet {
     }
   }
 
-  /// Clears all cells within the given [range].
+  /// Clears all cells within the given [range] without iterating unpopulated rows.
   void clearRange(CellRange range) {
-    for (var r = range.topRow; r <= range.bottomRow; r++) {
+    final rowsToCheck = _sparseMatrix.keys
+        .where((r) => r >= range.topRow && r <= range.bottomRow)
+        .toList();
+    for (final r in rowsToCheck) {
       final rowMap = _sparseMatrix[r];
       if (rowMap == null) continue;
 
-      for (var c = range.leftCol; c <= range.rightCol; c++) {
+      final colsToRemove = rowMap.keys
+          .where((c) => c >= range.leftCol && c <= range.rightCol)
+          .toList();
+      for (final c in colsToRemove) {
         rowMap.remove(c);
       }
 
@@ -146,11 +152,31 @@ class Worksheet {
     }
   }
 
+  /// Clears all populated cells while preserving custom column widths and row heights.
+  void clearCells() {
+    _sparseMatrix.clear();
+  }
+
+  /// Returns an iterable over all populated cells within the specified [range].
+  Iterable<Cell> getPopulatedCellsInRange(CellRange range) sync* {
+    for (final entry in _sparseMatrix.entries) {
+      final r = entry.key;
+      if (r < range.topRow || r > range.bottomRow) continue;
+      for (final cellEntry in entry.value.entries) {
+        final c = cellEntry.key;
+        if (c >= range.leftCol && c <= range.rightCol) {
+          yield cellEntry.value;
+        }
+      }
+    }
+  }
+
   /// Clears all cells and custom dimensions in this worksheet.
   void clear() {
     _sparseMatrix.clear();
     _customColumnWidths.clear();
     _customRowHeights.clear();
+    _hiddenRows.clear();
   }
 
   /// Returns an iterable over all populated cells.
@@ -266,6 +292,101 @@ class Worksheet {
 
   /// Map of all custom row heights.
   Map<int, double> get customRowHeights => Map.unmodifiable(_customRowHeights);
+
+  /// Returns the vertical logical pixel offset for the top of row [rowIndex].
+  double getRowOffset(int rowIndex) {
+    if (rowIndex <= 0) return 0.0;
+    if (_customRowHeights.isEmpty && _hiddenRows.isEmpty) {
+      return rowIndex * defaultRowHeight;
+    }
+    double offset = rowIndex * defaultRowHeight;
+    for (final hidden in _hiddenRows) {
+      if (hidden < rowIndex) {
+        offset -= (_customRowHeights[hidden] ?? defaultRowHeight);
+      }
+    }
+    for (final entry in _customRowHeights.entries) {
+      if (entry.key < rowIndex && !_hiddenRows.contains(entry.key)) {
+        offset += (entry.value - defaultRowHeight);
+      }
+    }
+    return offset;
+  }
+
+  /// Returns the horizontal logical pixel offset for the left of column [colIndex].
+  double getColumnOffset(int colIndex) {
+    if (colIndex <= 0) return 0.0;
+    if (_customColumnWidths.isEmpty) {
+      return colIndex * defaultColumnWidth;
+    }
+    double offset = colIndex * defaultColumnWidth;
+    for (final entry in _customColumnWidths.entries) {
+      if (entry.key < colIndex) {
+        offset += (entry.value - defaultColumnWidth);
+      }
+    }
+    return offset;
+  }
+
+  /// Returns the 0-indexed row at vertical offset [offsetY], skipping hidden rows.
+  int getRowAtOffset(double offsetY) {
+    if (offsetY <= 0) return 0;
+    if (_customRowHeights.isEmpty && _hiddenRows.isEmpty) {
+      return (offsetY / defaultRowHeight).floor().clamp(
+        0,
+        CellCoordinate.maxRows - 1,
+      );
+    }
+    int row = (offsetY / defaultRowHeight).floor().clamp(
+      0,
+      CellCoordinate.maxRows - 1,
+    );
+    double currentY = getRowOffset(row);
+    if (currentY > offsetY) {
+      while (row > 0 && currentY > offsetY) {
+        row--;
+        currentY = getRowOffset(row);
+      }
+    } else {
+      while (row < CellCoordinate.maxRows - 1) {
+        final h = getRowHeight(row);
+        if (currentY + h > offsetY) break;
+        currentY += h;
+        row++;
+      }
+    }
+    return row.clamp(0, CellCoordinate.maxRows - 1);
+  }
+
+  /// Returns the 0-indexed column at horizontal offset [offsetX].
+  int getColumnAtOffset(double offsetX) {
+    if (offsetX <= 0) return 0;
+    if (_customColumnWidths.isEmpty) {
+      return (offsetX / defaultColumnWidth).floor().clamp(
+        0,
+        CellCoordinate.maxCols - 1,
+      );
+    }
+    int col = (offsetX / defaultColumnWidth).floor().clamp(
+      0,
+      CellCoordinate.maxCols - 1,
+    );
+    double currentX = getColumnOffset(col);
+    if (currentX > offsetX) {
+      while (col > 0 && currentX > offsetX) {
+        col--;
+        currentX = getColumnOffset(col);
+      }
+    } else {
+      while (col < CellCoordinate.maxCols - 1) {
+        final w = getColumnWidth(col);
+        if (currentX + w > offsetX) break;
+        currentX += w;
+        col++;
+      }
+    }
+    return col.clamp(0, CellCoordinate.maxCols - 1);
+  }
 
   @override
   String toString() =>

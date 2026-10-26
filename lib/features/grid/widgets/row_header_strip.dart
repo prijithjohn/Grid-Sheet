@@ -26,8 +26,9 @@ class RowHeaderStrip extends StatelessWidget {
     final selection = state.selection;
 
     // Calculate visible rows (0-indexed)
-    double currentY = 0;
-    int row = 0;
+    int startRow = worksheet.getRowAtOffset(scrollY);
+    double currentY = worksheet.getRowOffset(startRow);
+    int row = startRow;
     final visibleRows = <_VisibleRowInfo>[];
 
     while (currentY < scrollY + viewportHeight &&

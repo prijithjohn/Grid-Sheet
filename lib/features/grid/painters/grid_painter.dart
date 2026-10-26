@@ -33,29 +33,22 @@ class GridPainter extends CustomPainter {
     final frozenCols = worksheet.frozenCols;
     final frozenRows = worksheet.frozenRows;
 
-    // Calculate frozen width and height
-    double frozenWidth = 0;
-    for (int c = 0; c < frozenCols; c++) {
-      frozenWidth += worksheet.getColumnWidth(c);
-    }
-    double frozenHeight = 0;
-    for (int r = 0; r < frozenRows; r++) {
-      frozenHeight += worksheet.getRowHeight(r);
-    }
+    final frozenWidth = worksheet.getColumnOffset(frozenCols);
+    final frozenHeight = worksheet.getRowOffset(frozenRows);
 
     // Calculate visible columns (0-indexed)
     final visibleCols = <int, double>{};
-    double fx = 0;
     for (int c = 0; c < frozenCols; c++) {
-      visibleCols[c] = fx;
-      fx += worksheet.getColumnWidth(c);
+      visibleCols[c] = worksheet.getColumnOffset(c);
     }
 
-    double currentX = fx;
-    int col = frozenCols;
+    int startCol = worksheet.getColumnAtOffset(scrollX + frozenWidth);
+    if (startCol < frozenCols) startCol = frozenCols;
+    double currentX = worksheet.getColumnOffset(startCol);
+    int col = startCol;
     while (currentX < scrollX + viewportWidth && col < CellCoordinate.maxCols) {
       final colWidth = worksheet.getColumnWidth(col);
-      if (currentX + colWidth >= scrollX + fx) {
+      if (currentX + colWidth >= scrollX + frozenWidth) {
         visibleCols[col] = currentX - scrollX;
       }
       currentX += colWidth;
@@ -64,21 +57,21 @@ class GridPainter extends CustomPainter {
 
     // Calculate visible rows (0-indexed)
     final visibleRows = <int, double>{};
-    double fy = 0;
     for (int r = 0; r < frozenRows; r++) {
       final h = worksheet.getRowHeight(r);
       if (h > 0) {
-        visibleRows[r] = fy;
-        fy += h;
+        visibleRows[r] = worksheet.getRowOffset(r);
       }
     }
 
-    double currentY = fy;
-    int row = frozenRows;
+    int startRow = worksheet.getRowAtOffset(scrollY + frozenHeight);
+    if (startRow < frozenRows) startRow = frozenRows;
+    double currentY = worksheet.getRowOffset(startRow);
+    int row = startRow;
     while (currentY < scrollY + viewportHeight &&
         row < CellCoordinate.maxRows) {
       final rowHeight = worksheet.getRowHeight(row);
-      if (rowHeight > 0 && currentY + rowHeight >= scrollY + fy) {
+      if (rowHeight > 0 && currentY + rowHeight >= scrollY + frozenHeight) {
         visibleRows[row] = currentY - scrollY;
       }
       currentY += rowHeight;

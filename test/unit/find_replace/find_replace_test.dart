@@ -23,10 +23,10 @@ void main() {
 
       // Formula cell: displays "42" from =SUM(20, 22)
       sheet1.setCell(
-        Cell(
-          coordinate: const CellCoordinate(2, 0),
+        const Cell(
+          coordinate: CellCoordinate(2, 0),
           rawInput: '=SUM(20, 22)',
-          computedValue: const NumberCellValue(42),
+          computedValue: NumberCellValue(42),
           style: CellStyle.defaultStyle,
         ),
       );

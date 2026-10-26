@@ -26,8 +26,9 @@ class ColumnHeaderStrip extends StatelessWidget {
     final selection = state.selection;
 
     // Calculate visible columns (0-indexed)
-    double currentX = 0;
-    int col = 0;
+    int startCol = worksheet.getColumnAtOffset(scrollX);
+    double currentX = worksheet.getColumnOffset(startCol);
+    int col = startCol;
     final visibleCols = <_VisibleColInfo>[];
 
     while (currentX < scrollX + viewportWidth && col < CellCoordinate.maxCols) {

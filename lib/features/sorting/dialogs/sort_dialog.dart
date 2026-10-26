@@ -195,7 +195,7 @@ class _SortDialogState extends State<SortDialog> {
                         child: SizedBox(
                           height: 32,
                           child: DropdownButtonFormField<int>(
-                            value: _selectedColumn,
+                            initialValue: _selectedColumn,
                             isExpanded: true,
                             isDense: true,
                             decoration: InputDecoration(
@@ -262,7 +262,7 @@ class _SortDialogState extends State<SortDialog> {
                         child: SizedBox(
                           height: 32,
                           child: DropdownButtonFormField<bool>(
-                            value: _ascending,
+                            initialValue: _ascending,
                             isExpanded: true,
                             isDense: true,
                             decoration: InputDecoration(

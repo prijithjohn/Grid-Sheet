@@ -417,7 +417,7 @@ class InsertRowsCommand extends Command {
     }
 
     // Clear worksheet cells
-    worksheet.clear();
+    worksheet.clearCells();
 
     // Re-apply unaffected cells with adjusted formula references
     for (final cell in cellsUnchanged) {
@@ -470,7 +470,7 @@ class InsertRowsCommand extends Command {
 
   @override
   void undo() {
-    worksheet.clear();
+    worksheet.clearCells();
     for (final cell in _allCellsBefore.values) {
       worksheet.setCell(cell);
     }
@@ -538,7 +538,7 @@ class DeleteRowsCommand extends Command {
       // Cells in [startRow, startRow + count - 1] are deleted
     }
 
-    worksheet.clear();
+    worksheet.clearCells();
 
     for (final cell in cellsUnchanged) {
       var raw = cell.rawInput;
@@ -588,7 +588,7 @@ class DeleteRowsCommand extends Command {
 
   @override
   void undo() {
-    worksheet.clear();
+    worksheet.clearCells();
     for (final cell in _allCellsBefore.values) {
       worksheet.setCell(cell);
     }
@@ -655,7 +655,7 @@ class InsertColumnsCommand extends Command {
       }
     }
 
-    worksheet.clear();
+    worksheet.clearCells();
 
     for (final cell in cellsUnchanged) {
       var raw = cell.rawInput;
@@ -704,7 +704,7 @@ class InsertColumnsCommand extends Command {
 
   @override
   void undo() {
-    worksheet.clear();
+    worksheet.clearCells();
     for (final cell in _allCellsBefore.values) {
       worksheet.setCell(cell);
     }
@@ -772,7 +772,7 @@ class DeleteColumnsCommand extends Command {
       }
     }
 
-    worksheet.clear();
+    worksheet.clearCells();
 
     for (final cell in cellsUnchanged) {
       var raw = cell.rawInput;
@@ -821,7 +821,7 @@ class DeleteColumnsCommand extends Command {
 
   @override
   void undo() {
-    worksheet.clear();
+    worksheet.clearCells();
     for (final cell in _allCellsBefore.values) {
       worksheet.setCell(cell);
     }

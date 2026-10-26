@@ -186,7 +186,7 @@ class _ColumnFilterDialogState extends State<ColumnFilterDialog> {
                         width: 90,
                         height: 30,
                         child: DropdownButtonFormField<NumericFilterOp>(
-                          value: _selectedNumericOp,
+                          initialValue: _selectedNumericOp,
                           isDense: true,
                           decoration: InputDecoration(
                             contentPadding: const EdgeInsets.symmetric(
