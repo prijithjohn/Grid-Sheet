@@ -189,6 +189,11 @@ class Worksheet {
     }
   }
 
+  /// Resets the width of column [colIndex] to the default width by removing any custom override.
+  void resetColumnWidth(int colIndex) {
+    _customColumnWidths.remove(colIndex);
+  }
+
   /// Retrieves the height of row [rowIndex] in logical pixels.
   double getRowHeight(int rowIndex) {
     return _customRowHeights[rowIndex] ?? defaultRowHeight;
@@ -201,6 +206,11 @@ class Worksheet {
     } else {
       _customRowHeights[rowIndex] = height;
     }
+  }
+
+  /// Resets the height of row [rowIndex] to the default height by removing any custom override.
+  void resetRowHeight(int rowIndex) {
+    _customRowHeights.remove(rowIndex);
   }
 
   /// Map of all custom column widths.

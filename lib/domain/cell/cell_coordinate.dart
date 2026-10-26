@@ -173,6 +173,9 @@ class CellCoordinate implements Comparable<CellCoordinate> {
     return '$colPart$rowPart';
   }
 
+  /// Shorthand getter returning standard A1 notation string without anchors.
+  String get a1 => toA1(includeAnchors: false);
+
   /// Returns a new [CellCoordinate] shifted by [rowDelta] and [colDelta].
   ///
   /// Throws [RangeError] if the resulting coordinate falls outside [0, maxRows) or [0, maxCols).

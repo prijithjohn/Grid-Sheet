@@ -1,30 +1,26 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:grid_sheet/app/state/workbook_state.dart';
+import 'package:grid_sheet/domain/domain.dart';
 import 'package:grid_sheet/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('GridSheetApp mounts and renders desktop shell components', (
+    WidgetTester tester,
+  ) async {
+    final workbook = Workbook.createDefault();
+    final state = WorkbookState(initialWorkbook: workbook);
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpWidget(GridSheetApp(state: state));
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify Title bar and branding
+    expect(find.text('Grid Sheet'), findsWidgets);
+    expect(find.text('Ready'), findsOneWidget);
+
+    // Verify Formula bar name box starts at A1
+    expect(find.text('A1'), findsOneWidget);
+
+    // Verify initial sheet tab
+    expect(find.text('Sheet1'), findsOneWidget);
   });
 }

@@ -16,6 +16,9 @@ class Cell {
   /// The evaluated result of the cell (distinct from [rawInput]).
   final CellValue computedValue;
 
+  /// Convenient alias for [computedValue].
+  CellValue get value => computedValue;
+
   /// Visual formatting and styling tokens applied to this cell.
   final CellStyle style;
 
@@ -27,12 +30,15 @@ class Cell {
   });
 
   /// Creates an empty cell at the given [coordinate].
-  factory Cell.empty(CellCoordinate coordinate) {
+  factory Cell.empty(
+    CellCoordinate coordinate, {
+    CellStyle style = CellStyle.defaultStyle,
+  }) {
     return Cell(
       coordinate: coordinate,
       rawInput: '',
       computedValue: const EmptyCellValue(),
-      style: CellStyle.defaultStyle,
+      style: style,
     );
   }
 
@@ -209,3 +215,6 @@ class Cell {
   String toString() =>
       'Cell(${coordinate.toA1()}: "$rawInput" => $computedValue)';
 }
+
+/// Type alias providing backwards-compatible and alternative naming for [Cell].
+typedef CellModel = Cell;
