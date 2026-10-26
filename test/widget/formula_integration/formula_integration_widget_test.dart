@@ -22,69 +22,100 @@ void main() {
   // Formula Bar — formula preservation display
   // ---------------------------------------------------------------------------
   group('Phase 05 Widget — FormulaBar Formula Display', () {
-    testWidgets('formula bar shows rawInput (formula text) for formula cell',
-        (tester) async {
+    testWidgets('formula bar shows rawInput (formula text) for formula cell', (
+      tester,
+    ) async {
       final state = WorkbookState();
       state.editCellAt(const CellCoordinate(0, 0), '50');
       state.editCellAt(const CellCoordinate(1, 0), '=A1*2');
       state.selectCell(const CellCoordinate(1, 0));
 
-      await tester.pumpWidget(_wrap(state: state, child: FormulaBar(state: state)));
+      await tester.pumpWidget(
+        _wrap(
+          state: state,
+          child: FormulaBar(state: state),
+        ),
+      );
       await tester.pump();
 
       // The formula bar text field should show the raw formula, not '100'
       expect(find.text('=A1*2'), findsOneWidget);
     });
 
-    testWidgets('formula bar shows plain number for non-formula cell',
-        (tester) async {
+    testWidgets('formula bar shows plain number for non-formula cell', (
+      tester,
+    ) async {
       final state = WorkbookState();
       state.editCellAt(const CellCoordinate(0, 0), '42');
       state.selectCell(const CellCoordinate(0, 0));
 
-      await tester.pumpWidget(_wrap(state: state, child: FormulaBar(state: state)));
+      await tester.pumpWidget(
+        _wrap(
+          state: state,
+          child: FormulaBar(state: state),
+        ),
+      );
       await tester.pump();
 
       expect(find.text('42'), findsOneWidget);
     });
 
-    testWidgets('formula bar updates when selection moves to a different cell',
-        (tester) async {
-      final state = WorkbookState();
-      state.editCellAt(const CellCoordinate(0, 0), '=1+1');
-      state.editCellAt(const CellCoordinate(1, 0), 'plain text');
+    testWidgets(
+      'formula bar updates when selection moves to a different cell',
+      (tester) async {
+        final state = WorkbookState();
+        state.editCellAt(const CellCoordinate(0, 0), '=1+1');
+        state.editCellAt(const CellCoordinate(1, 0), 'plain text');
 
-      await tester.pumpWidget(_wrap(state: state, child: FormulaBar(state: state)));
+        await tester.pumpWidget(
+          _wrap(
+            state: state,
+            child: FormulaBar(state: state),
+          ),
+        );
 
-      // Select formula cell
-      state.selectCell(const CellCoordinate(0, 0));
-      await tester.pump();
-      expect(find.text('=1+1'), findsOneWidget);
+        // Select formula cell
+        state.selectCell(const CellCoordinate(0, 0));
+        await tester.pump();
+        expect(find.text('=1+1'), findsOneWidget);
 
-      // Move to plain text cell
-      state.selectCell(const CellCoordinate(1, 0));
-      await tester.pump();
-      expect(find.text('plain text'), findsOneWidget);
-    });
+        // Move to plain text cell
+        state.selectCell(const CellCoordinate(1, 0));
+        await tester.pump();
+        expect(find.text('plain text'), findsOneWidget);
+      },
+    );
 
-    testWidgets('name box shows correct A1 address of selected cell',
-        (tester) async {
+    testWidgets('name box shows correct A1 address of selected cell', (
+      tester,
+    ) async {
       final state = WorkbookState();
       state.selectCell(const CellCoordinate(2, 3)); // D3
 
-      await tester.pumpWidget(_wrap(state: state, child: FormulaBar(state: state)));
+      await tester.pumpWidget(
+        _wrap(
+          state: state,
+          child: FormulaBar(state: state),
+        ),
+      );
       await tester.pump();
 
       expect(find.text('D3'), findsOneWidget);
     });
 
-    testWidgets('submitting formula from formula bar commits and evaluates',
-        (tester) async {
+    testWidgets('submitting formula from formula bar commits and evaluates', (
+      tester,
+    ) async {
       final state = WorkbookState();
       state.editCellAt(const CellCoordinate(0, 0), '5');
       state.selectCell(const CellCoordinate(1, 0)); // A2 selected
 
-      await tester.pumpWidget(_wrap(state: state, child: FormulaBar(state: state)));
+      await tester.pumpWidget(
+        _wrap(
+          state: state,
+          child: FormulaBar(state: state),
+        ),
+      );
       await tester.pump();
 
       // Tap the formula input field
@@ -115,10 +146,7 @@ void main() {
       await tester.pumpWidget(
         _wrap(
           state: state,
-          child: DesktopShortcuts(
-            state: state,
-            child: const SizedBox.expand(),
-          ),
+          child: DesktopShortcuts(state: state, child: const SizedBox.expand()),
         ),
       );
       await tester.pump();
@@ -135,7 +163,10 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
       await tester.pump();
 
-      expect(state.activeWorksheet.getCell(const CellCoordinate(0, 0))?.style.isBold, isTrue);
+      expect(
+        state.activeWorksheet.getCell(const CellCoordinate(0, 0))?.style.isBold,
+        isTrue,
+      );
     });
 
     testWidgets('Ctrl+I toggles italic on selection', (tester) async {
@@ -146,10 +177,7 @@ void main() {
       await tester.pumpWidget(
         _wrap(
           state: state,
-          child: DesktopShortcuts(
-            state: state,
-            child: const SizedBox.expand(),
-          ),
+          child: DesktopShortcuts(state: state, child: const SizedBox.expand()),
         ),
       );
       await tester.pump();
@@ -162,7 +190,13 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
       await tester.pump();
 
-      expect(state.activeWorksheet.getCell(const CellCoordinate(0, 0))?.style.isItalic, isTrue);
+      expect(
+        state.activeWorksheet
+            .getCell(const CellCoordinate(0, 0))
+            ?.style
+            .isItalic,
+        isTrue,
+      );
     });
 
     testWidgets('Ctrl+U toggles underline on selection', (tester) async {
@@ -173,10 +207,7 @@ void main() {
       await tester.pumpWidget(
         _wrap(
           state: state,
-          child: DesktopShortcuts(
-            state: state,
-            child: const SizedBox.expand(),
-          ),
+          child: DesktopShortcuts(state: state, child: const SizedBox.expand()),
         ),
       );
       await tester.pump();
@@ -190,7 +221,10 @@ void main() {
       await tester.pump();
 
       expect(
-        state.activeWorksheet.getCell(const CellCoordinate(0, 0))?.style.isUnderline,
+        state.activeWorksheet
+            .getCell(const CellCoordinate(0, 0))
+            ?.style
+            .isUnderline,
         isTrue,
       );
     });
@@ -203,10 +237,7 @@ void main() {
       await tester.pumpWidget(
         _wrap(
           state: state,
-          child: DesktopShortcuts(
-            state: state,
-            child: const SizedBox.expand(),
-          ),
+          child: DesktopShortcuts(state: state, child: const SizedBox.expand()),
         ),
       );
       await tester.pump();
@@ -249,10 +280,7 @@ void main() {
       await tester.pumpWidget(
         _wrap(
           state: state,
-          child: DesktopShortcuts(
-            state: state,
-            child: const SizedBox.expand(),
-          ),
+          child: DesktopShortcuts(state: state, child: const SizedBox.expand()),
         ),
       );
       await tester.pump();
@@ -281,17 +309,17 @@ void main() {
       await tester.pumpWidget(
         _wrap(
           state: state,
-          child: DesktopShortcuts(
-            state: state,
-            child: const SizedBox.expand(),
-          ),
+          child: DesktopShortcuts(state: state, child: const SizedBox.expand()),
         ),
       );
       await tester.pump();
       await tester.tap(find.byType(Focus).last);
       await tester.pump();
 
-      expect(state.activeWorksheet.getCell(const CellCoordinate(0, 0)), isNotNull);
+      expect(
+        state.activeWorksheet.getCell(const CellCoordinate(0, 0)),
+        isNotNull,
+      );
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.keyZ);

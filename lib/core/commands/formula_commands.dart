@@ -59,7 +59,9 @@ class SetFormulaCommand extends Command {
   @override
   void undo() {
     // 1. Clear the entire worksheet
-    for (final coord in List.of(worksheet.populatedCells.map((c) => c.coordinate))) {
+    for (final coord in List.of(
+      worksheet.populatedCells.map((c) => c.coordinate),
+    )) {
       worksheet.removeCell(coord);
     }
 
@@ -126,7 +128,9 @@ class ClearFormulaRangeCommand extends Command {
   @override
   void undo() {
     // Clear current state
-    for (final coord in List.of(worksheet.populatedCells.map((c) => c.coordinate))) {
+    for (final coord in List.of(
+      worksheet.populatedCells.map((c) => c.coordinate),
+    )) {
       worksheet.removeCell(coord);
     }
     for (final coord in engine.dependencyGraph.formulaCells.toList()) {

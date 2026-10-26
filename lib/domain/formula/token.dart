@@ -18,7 +18,6 @@ enum TokenType {
   multiply, // *
   divide, // /
   power, // ^
-
   // Comparison Operators
   equal, // =
   notEqual, // <> or !=
@@ -26,13 +25,11 @@ enum TokenType {
   lessThanOrEqual, // <=
   greaterThan, // >
   greaterThanOrEqual, // >=
-
   // Punctuation
   openParen, // (
   closeParen, // )
   comma, // ,
   colon, // :
-
   // End of file / error
   eof,
   error,

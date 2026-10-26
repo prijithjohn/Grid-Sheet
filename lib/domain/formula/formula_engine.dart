@@ -14,11 +14,9 @@ class FormulaEngine {
   final DependencyGraph dependencyGraph;
   final FormulaEvaluator evaluator;
 
-  FormulaEngine({
-    DependencyGraph? dependencyGraph,
-    FormulaEvaluator? evaluator,
-  })  : dependencyGraph = dependencyGraph ?? DependencyGraph(),
-        evaluator = evaluator ?? FormulaEvaluator();
+  FormulaEngine({DependencyGraph? dependencyGraph, FormulaEvaluator? evaluator})
+    : dependencyGraph = dependencyGraph ?? DependencyGraph(),
+      evaluator = evaluator ?? FormulaEvaluator();
 
   /// Parses a formula expression string into a [FormulaNode] AST.
   FormulaNode parse(String formulaSource) {
@@ -74,7 +72,8 @@ class FormulaEngine {
           coordinate: coordinate,
           rawInput: rawInput,
           computedValue: const ErrorCellValue(CellError.circular),
-          style: style ?? existingCell?.style ?? CellModel.empty(coordinate).style,
+          style:
+              style ?? existingCell?.style ?? CellModel.empty(coordinate).style,
         );
         worksheet.setCell(cell);
       } else {
@@ -84,7 +83,8 @@ class FormulaEngine {
           coordinate: coordinate,
           rawInput: rawInput,
           computedValue: computed,
-          style: style ?? existingCell?.style ?? CellModel.empty(coordinate).style,
+          style:
+              style ?? existingCell?.style ?? CellModel.empty(coordinate).style,
         );
         worksheet.setCell(cell);
       }
@@ -97,7 +97,12 @@ class FormulaEngine {
         dependencyGraph.removeFormula(coordinate);
       }
 
-      final cell = Cell.fromInput(coordinate, rawInput, style: style ?? existingCell?.style ?? CellModel.empty(coordinate).style);
+      final cell = Cell.fromInput(
+        coordinate,
+        rawInput,
+        style:
+            style ?? existingCell?.style ?? CellModel.empty(coordinate).style,
+      );
       worksheet.setCell(cell);
 
       // Recalculate dependents that read from this precedent cell
@@ -135,9 +140,11 @@ class FormulaEngine {
     for (final coord in plan.circularCells) {
       final cell = worksheet.getCell(coord);
       if (cell != null) {
-        worksheet.setCell(cell.copyWith(
-          computedValue: const ErrorCellValue(CellError.circular),
-        ));
+        worksheet.setCell(
+          cell.copyWith(
+            computedValue: const ErrorCellValue(CellError.circular),
+          ),
+        );
       }
     }
 
@@ -152,6 +159,11 @@ class FormulaEngine {
     }
   }
 
+  /// Clears all registered formulas and dependencies from the engine.
+  void clear() {
+    dependencyGraph.clear();
+  }
+
   /// Recalculates all formula cells currently populated in [worksheet].
   void recalculateAll(Worksheet worksheet, {Workbook? workbook}) {
     // Collect all formula cells
@@ -164,5 +176,13 @@ class FormulaEngine {
 
     final allCoords = dependencyGraph.formulaCells.toList();
     recalculateDependents(worksheet, allCoords, workbook: workbook);
+  }
+
+  /// Clears and recalculates all formula cells across all worksheets in [workbook].
+  void recalculateWorkbook(Workbook workbook) {
+    clear();
+    for (final sheet in workbook.sheets) {
+      recalculateAll(sheet, workbook: workbook);
+    }
   }
 }

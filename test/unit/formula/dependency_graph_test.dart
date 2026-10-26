@@ -14,8 +14,7 @@ void main() {
     const c1 = CellCoordinate(0, 2); // C1
     const d1 = CellCoordinate(0, 3); // D1
 
-    FormulaNode parseFormula(String s) =>
-        FormulaParser.fromString(s).parse();
+    FormulaNode parseFormula(String s) => FormulaParser.fromString(s).parse();
 
     setUp(() {
       graph = DependencyGraph();

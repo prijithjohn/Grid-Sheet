@@ -277,8 +277,8 @@ class WorkbookState extends ChangeNotifier {
     _filePath = filePath;
     _isDirty = false;
     _commandStack.clear();
-    // Re-register and evaluate all formula cells in new workbook's active sheet
-    _engine.recalculateAll(workbook.activeSheet, workbook: workbook);
+    // Re-register and evaluate all formula cells across all sheets
+    _engine.recalculateWorkbook(workbook);
     notifyListeners();
   }
 

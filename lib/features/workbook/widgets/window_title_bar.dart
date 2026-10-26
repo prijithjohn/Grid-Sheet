@@ -16,12 +16,14 @@ class WindowTitleBar extends StatelessWidget {
     this.onMinimize,
     this.onMaximize,
     this.onClose,
+    this.onSave,
   });
 
   final WorkbookState state;
   final VoidCallback? onMinimize;
   final VoidCallback? onMaximize;
   final VoidCallback? onClose;
+  final VoidCallback? onSave;
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +81,28 @@ class WindowTitleBar extends StatelessWidget {
                 width: 1,
                 color: AppColors.canvasWhite.withValues(alpha: 0.3),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
+
+              // Quick Access Save
+              if (onSave != null) ...[
+                Tooltip(
+                  message: 'Save (Ctrl+S)',
+                  child: InkWell(
+                    key: const Key('quick_save_button'),
+                    onTap: onSave,
+                    borderRadius: BorderRadius.circular(2),
+                    child: Padding(
+                      padding: const EdgeInsets.all(3),
+                      child: Icon(
+                        Icons.save_outlined,
+                        size: 15,
+                        color: AppColors.canvasWhite.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
 
               // File Name & Dirty Indicator
               Flexible(

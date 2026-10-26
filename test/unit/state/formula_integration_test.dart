@@ -13,15 +13,18 @@ void main() {
       state = WorkbookState();
     });
 
-    test('entering a plain number stores it and displays as NumberCellValue', () {
-      state.editCellAt(const CellCoordinate(0, 0), '42');
+    test(
+      'entering a plain number stores it and displays as NumberCellValue',
+      () {
+        state.editCellAt(const CellCoordinate(0, 0), '42');
 
-      final cell = state.activeWorksheet.getCell(const CellCoordinate(0, 0));
-      expect(cell, isNotNull);
-      expect(cell!.rawInput, equals('42'));
-      expect(cell.computedValue, isA<NumberCellValue>());
-      expect((cell.computedValue as NumberCellValue).value, equals(42));
-    });
+        final cell = state.activeWorksheet.getCell(const CellCoordinate(0, 0));
+        expect(cell, isNotNull);
+        expect(cell!.rawInput, equals('42'));
+        expect(cell.computedValue, isA<NumberCellValue>());
+        expect((cell.computedValue as NumberCellValue).value, equals(42));
+      },
+    );
 
     test('entering a formula evaluates and stores result', () {
       state.editCellAt(const CellCoordinate(0, 0), '10');
@@ -70,7 +73,10 @@ void main() {
 
     test('empty input clears the cell', () {
       state.editCellAt(const CellCoordinate(0, 0), '100');
-      expect(state.activeWorksheet.getCell(const CellCoordinate(0, 0)), isNotNull);
+      expect(
+        state.activeWorksheet.getCell(const CellCoordinate(0, 0)),
+        isNotNull,
+      );
 
       state.editCellAt(const CellCoordinate(0, 0), '');
       expect(state.activeWorksheet.getCell(const CellCoordinate(0, 0)), isNull);
@@ -124,7 +130,7 @@ void main() {
     });
 
     test('range-based formula recalculates when any cell in range changes', () {
-      state.editCellAt(const CellCoordinate(0, 0), '5');  // A1
+      state.editCellAt(const CellCoordinate(0, 0), '5'); // A1
       state.editCellAt(const CellCoordinate(1, 0), '10'); // A2
       state.editCellAt(const CellCoordinate(2, 0), '=SUM(A1:A2)'); // A3
 
@@ -137,24 +143,27 @@ void main() {
       expect((sumCell!.computedValue as NumberCellValue).value, equals(25));
     });
 
-    test('clearing a precedent cell recalculates dependent to empty reference', () {
-      state.editCellAt(const CellCoordinate(0, 0), '100'); // A1
-      state.editCellAt(const CellCoordinate(1, 0), '=A1+5'); // A2 = 105
+    test(
+      'clearing a precedent cell recalculates dependent to empty reference',
+      () {
+        state.editCellAt(const CellCoordinate(0, 0), '100'); // A1
+        state.editCellAt(const CellCoordinate(1, 0), '=A1+5'); // A2 = 105
 
-      // Clear A1
-      state.selectCell(const CellCoordinate(0, 0));
-      state.clearSelection();
+        // Clear A1
+        state.selectCell(const CellCoordinate(0, 0));
+        state.clearSelection();
 
-      // A2 should recalculate — A1 is now empty (0 in SUM context)
-      final a2 = state.activeWorksheet.getCell(const CellCoordinate(1, 0));
-      expect(a2, isNotNull);
-      // EmptyCellValue treated as 0 in arithmetic, so =A1+5 = 5
-      expect((a2!.computedValue as NumberCellValue).value, equals(5));
-    });
+        // A2 should recalculate — A1 is now empty (0 in SUM context)
+        final a2 = state.activeWorksheet.getCell(const CellCoordinate(1, 0));
+        expect(a2, isNotNull);
+        // EmptyCellValue treated as 0 in arithmetic, so =A1+5 = 5
+        expect((a2!.computedValue as NumberCellValue).value, equals(5));
+      },
+    );
 
     test('formula replacement cleans up old dependencies', () {
       state.editCellAt(const CellCoordinate(0, 0), '10'); // A1
-      state.editCellAt(const CellCoordinate(0, 1), '5');  // B1
+      state.editCellAt(const CellCoordinate(0, 1), '5'); // B1
       state.editCellAt(const CellCoordinate(0, 2), '=A1+B1'); // C1 = 15
 
       var c1 = state.activeWorksheet.getCell(const CellCoordinate(0, 2));
@@ -172,7 +181,7 @@ void main() {
     });
 
     test('multiple dependent formulas all update correctly', () {
-      state.editCellAt(const CellCoordinate(0, 0), '5');   // A1
+      state.editCellAt(const CellCoordinate(0, 0), '5'); // A1
       state.editCellAt(const CellCoordinate(0, 1), '=A1+1'); // B1 = 6
       state.editCellAt(const CellCoordinate(0, 2), '=A1+2'); // C1 = 7
       state.editCellAt(const CellCoordinate(0, 3), '=A1+3'); // D1 = 8
@@ -180,15 +189,27 @@ void main() {
       state.editCellAt(const CellCoordinate(0, 0), '10'); // A1 = 10
 
       expect(
-        (state.activeWorksheet.getCell(const CellCoordinate(0, 1))!.computedValue as NumberCellValue).value,
+        (state.activeWorksheet
+                    .getCell(const CellCoordinate(0, 1))!
+                    .computedValue
+                as NumberCellValue)
+            .value,
         equals(11),
       );
       expect(
-        (state.activeWorksheet.getCell(const CellCoordinate(0, 2))!.computedValue as NumberCellValue).value,
+        (state.activeWorksheet
+                    .getCell(const CellCoordinate(0, 2))!
+                    .computedValue
+                as NumberCellValue)
+            .value,
         equals(12),
       );
       expect(
-        (state.activeWorksheet.getCell(const CellCoordinate(0, 3))!.computedValue as NumberCellValue).value,
+        (state.activeWorksheet
+                    .getCell(const CellCoordinate(0, 3))!
+                    .computedValue
+                as NumberCellValue)
+            .value,
         equals(13),
       );
     });
@@ -284,7 +305,10 @@ void main() {
 
       final cell = state.activeWorksheet.getCell(const CellCoordinate(0, 0));
       expect(cell!.computedValue, isA<ErrorCellValue>());
-      expect((cell.computedValue as ErrorCellValue).error, equals(CellError.divZero));
+      expect(
+        (cell.computedValue as ErrorCellValue).error,
+        equals(CellError.divZero),
+      );
     });
 
     test('unknown function returns #NAME? error', () {
@@ -292,7 +316,10 @@ void main() {
 
       final cell = state.activeWorksheet.getCell(const CellCoordinate(0, 0));
       expect(cell!.computedValue, isA<ErrorCellValue>());
-      expect((cell.computedValue as ErrorCellValue).error, equals(CellError.name));
+      expect(
+        (cell.computedValue as ErrorCellValue).error,
+        equals(CellError.name),
+      );
     });
 
     test('circular reference returns #CIRCULAR! error', () {
@@ -301,7 +328,10 @@ void main() {
 
       final cell = state.activeWorksheet.getCell(const CellCoordinate(0, 0));
       expect(cell!.computedValue, isA<ErrorCellValue>());
-      expect((cell.computedValue as ErrorCellValue).error, equals(CellError.circular));
+      expect(
+        (cell.computedValue as ErrorCellValue).error,
+        equals(CellError.circular),
+      );
     });
 
     test('malformed formula does not crash — returns error value', () {
@@ -314,7 +344,10 @@ void main() {
 
     test('errors propagate through dependent chain', () {
       state.editCellAt(const CellCoordinate(0, 0), '=1/0'); // #DIV/0!
-      state.editCellAt(const CellCoordinate(1, 0), '=A1+5'); // Should propagate error
+      state.editCellAt(
+        const CellCoordinate(1, 0),
+        '=A1+5',
+      ); // Should propagate error
 
       final a2 = state.activeWorksheet.getCell(const CellCoordinate(1, 0));
       expect(a2!.computedValue, isA<ErrorCellValue>());
@@ -350,22 +383,25 @@ void main() {
       expect((cell.computedValue as NumberCellValue).value, equals(100));
     });
 
-    test('switching sheets preserves formula cell rawInput for formula bar', () {
-      state.editCellAt(const CellCoordinate(0, 0), '42');
-      state.editCellAt(const CellCoordinate(1, 0), '=A1*2');
-      state.selectCell(const CellCoordinate(1, 0));
+    test(
+      'switching sheets preserves formula cell rawInput for formula bar',
+      () {
+        state.editCellAt(const CellCoordinate(0, 0), '42');
+        state.editCellAt(const CellCoordinate(1, 0), '=A1*2');
+        state.selectCell(const CellCoordinate(1, 0));
 
-      expect(state.activeCellInput, equals('=A1*2'));
+        expect(state.activeCellInput, equals('=A1*2'));
 
-      // Switch to a new sheet and back
-      state.addWorksheet(name: 'Sheet2');
-      state.setActiveSheetIndex(1);
-      state.setActiveSheetIndex(0);
+        // Switch to a new sheet and back
+        state.addWorksheet(name: 'Sheet2');
+        state.setActiveSheetIndex(1);
+        state.setActiveSheetIndex(0);
 
-      // Must re-select the formula cell since switching sheets resets selection to A1
-      state.selectCell(const CellCoordinate(1, 0));
-      expect(state.activeCellInput, equals('=A1*2'));
-    });
+        // Must re-select the formula cell since switching sheets resets selection to A1
+        state.selectCell(const CellCoordinate(1, 0));
+        expect(state.activeCellInput, equals('=A1*2'));
+      },
+    );
 
     test('missing sheet reference returns #REF! error gracefully', () {
       state.editCellAt(const CellCoordinate(0, 0), '=NoSuchSheet!A1');
@@ -391,7 +427,10 @@ void main() {
 
       state.applyStyleToSelection((s) => s.copyWith(isBold: true));
 
-      expect(state.activeWorksheet.getCell(const CellCoordinate(0, 0))?.style.isBold, isTrue);
+      expect(
+        state.activeWorksheet.getCell(const CellCoordinate(0, 0))?.style.isBold,
+        isTrue,
+      );
     });
 
     test('italic applied and undone correctly', () {
@@ -413,11 +452,17 @@ void main() {
       state.applyStyleToSelection((s) => s.copyWith(isUnderline: true));
 
       expect(
-        state.activeWorksheet.getCell(const CellCoordinate(0, 0))?.style.isUnderline,
+        state.activeWorksheet
+            .getCell(const CellCoordinate(0, 0))
+            ?.style
+            .isUnderline,
         isTrue,
       );
       expect(
-        state.activeWorksheet.getCell(const CellCoordinate(0, 1))?.style.isUnderline,
+        state.activeWorksheet
+            .getCell(const CellCoordinate(0, 1))
+            ?.style
+            .isUnderline,
         isTrue,
       );
     });
@@ -430,7 +475,10 @@ void main() {
       expect(state.activeCell?.style.fontSize, equals(18));
 
       state.undo();
-      expect(state.activeCell?.style.fontSize, equals(CellStyle.defaultStyle.fontSize));
+      expect(
+        state.activeCell?.style.fontSize,
+        equals(CellStyle.defaultStyle.fontSize),
+      );
     });
 
     test('alignment applied correctly', () {
@@ -454,8 +502,14 @@ void main() {
       // Change content — bold should persist
       state.editCellAt(const CellCoordinate(0, 0), 'Updated');
 
-      expect(state.activeWorksheet.getCell(const CellCoordinate(0, 0))?.style.isBold, isTrue);
-      expect(state.activeWorksheet.getCell(const CellCoordinate(0, 0))?.rawInput, equals('Updated'));
+      expect(
+        state.activeWorksheet.getCell(const CellCoordinate(0, 0))?.style.isBold,
+        isTrue,
+      );
+      expect(
+        state.activeWorksheet.getCell(const CellCoordinate(0, 0))?.rawInput,
+        equals('Updated'),
+      );
     });
 
     test('formatting preserved when formula result updates', () {
@@ -475,7 +529,9 @@ void main() {
     test('clearing content with clearSelection does not erase formatting', () {
       state.editCellAt(const CellCoordinate(0, 0), 'Styled');
       state.selectCell(const CellCoordinate(0, 0));
-      state.applyStyleToSelection((s) => s.copyWith(isBold: true, fontSize: 16));
+      state.applyStyleToSelection(
+        (s) => s.copyWith(isBold: true, fontSize: 16),
+      );
 
       // Clear via clearSelection (content only — leaves style-only cell)
       state.clearSelection();
@@ -527,7 +583,10 @@ void main() {
       expect(state.activeCell?.style.fontSize, equals(24));
 
       state.undo(); // Undo fontSize
-      expect(state.activeCell?.style.fontSize, equals(CellStyle.defaultStyle.fontSize));
+      expect(
+        state.activeCell?.style.fontSize,
+        equals(CellStyle.defaultStyle.fontSize),
+      );
       expect(state.activeCell?.style.isBold, isTrue); // Bold still applied
 
       state.undo(); // Undo bold
@@ -556,8 +615,14 @@ void main() {
       state.editCellAt(const CellCoordinate(1, 0), '=A1+1');
 
       final engine = state.formulaEngine;
-      expect(engine.dependencyGraph.hasFormula(const CellCoordinate(1, 0)), isTrue);
-      expect(engine.dependencyGraph.hasFormula(const CellCoordinate(0, 0)), isFalse);
+      expect(
+        engine.dependencyGraph.hasFormula(const CellCoordinate(1, 0)),
+        isTrue,
+      );
+      expect(
+        engine.dependencyGraph.hasFormula(const CellCoordinate(0, 0)),
+        isFalse,
+      );
     });
   });
 }

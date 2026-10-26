@@ -130,7 +130,8 @@ class FormulaParser {
     final expr = _unary();
 
     if (_match(TokenType.power)) {
-      final right = _exponentiation(); // right-recursive for right-associativity
+      final right =
+          _exponentiation(); // right-recursive for right-associativity
       return BinaryOpNode(op: BinaryOp.power, left: expr, right: right);
     }
 
@@ -305,8 +306,10 @@ class FormulaParser {
       final rowNum = int.parse(rowStr);
       final row = rowNum - 1; // Convert 1-indexed to 0-indexed
 
-      if (col < 0 || col >= CellCoordinate.maxCols ||
-          row < 0 || row >= CellCoordinate.maxRows) {
+      if (col < 0 ||
+          col >= CellCoordinate.maxCols ||
+          row < 0 ||
+          row >= CellCoordinate.maxRows) {
         return ErrorNode(CellError.ref, 'Reference out of bounds: $raw');
       }
 

@@ -124,7 +124,7 @@ class DependencyGraph {
   /// - `orderedCells`: Topologically sorted list of non-circular formula cells in evaluation order.
   /// - `circularCells`: Set of formula cells trapped in circular dependencies.
   ({List<CellCoordinate> orderedCells, Set<CellCoordinate> circularCells})
-      getRecalculationPlan(Iterable<CellCoordinate> changedCells) {
+  getRecalculationPlan(Iterable<CellCoordinate> changedCells) {
     // 1. Collect all transitive dependents
     final affected = <CellCoordinate>{};
     final queue = Queue<CellCoordinate>.from(changedCells);

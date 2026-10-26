@@ -11,9 +11,20 @@ import '../../../domain/domain.dart';
 /// Features expandable/collapsible toolbar groups, Undo/Redo integration,
 /// and common formatting action clusters.
 class RibbonBar extends StatefulWidget {
-  const RibbonBar({super.key, required this.state});
+  const RibbonBar({
+    super.key,
+    required this.state,
+    this.onNew,
+    this.onOpen,
+    this.onSave,
+    this.onSaveAs,
+  });
 
   final WorkbookState state;
+  final VoidCallback? onNew;
+  final VoidCallback? onOpen;
+  final VoidCallback? onSave;
+  final VoidCallback? onSaveAs;
 
   @override
   State<RibbonBar> createState() => _RibbonBarState();
@@ -110,148 +121,191 @@ class _RibbonBarState extends State<RibbonBar> {
               ),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    // Undo / Redo Quick Cluster
-                    _RibbonActionButton(
-                      icon: Icons.undo,
-                      label: 'Undo',
-                      tooltip: 'Undo (Ctrl+Z)',
-                      enabled: widget.state.canUndo,
-                      onPressed: widget.state.canUndo
-                          ? widget.state.undo
-                          : null,
-                    ),
-                    _RibbonActionButton(
-                      icon: Icons.redo,
-                      label: 'Redo',
-                      tooltip: 'Redo (Ctrl+Y)',
-                      enabled: widget.state.canRedo,
-                      onPressed: widget.state.canRedo
-                          ? widget.state.redo
-                          : null,
-                    ),
-
-                    _RibbonDivider(),
-
-                    // Clipboard Cluster
-                    _RibbonActionButton(
-                      icon: Icons.content_paste,
-                      label: 'Paste',
-                      tooltip: 'Paste (Ctrl+V)',
-                      onPressed: () {},
-                    ),
-                    _RibbonActionButton(
-                      icon: Icons.content_cut,
-                      label: 'Cut',
-                      tooltip: 'Cut (Ctrl+X)',
-                      onPressed: () {},
-                    ),
-                    _RibbonActionButton(
-                      icon: Icons.content_copy,
-                      label: 'Copy',
-                      tooltip: 'Copy (Ctrl+C)',
-                      onPressed: () {},
-                    ),
-
-                    _RibbonDivider(),
-
-                    // Quick Formatting Cluster
-                    _RibbonActionButton(
-                      icon: Icons.format_bold,
-                      label: 'Bold',
-                      tooltip: 'Bold (Ctrl+B)',
-                      onPressed: () {
-                        widget.state.applyStyleToSelection(
-                          (curr) => curr.copyWith(isBold: !curr.isBold),
-                        );
-                      },
-                    ),
-                    _RibbonActionButton(
-                      icon: Icons.format_italic,
-                      label: 'Italic',
-                      tooltip: 'Italic (Ctrl+I)',
-                      onPressed: () {
-                        widget.state.applyStyleToSelection(
-                          (curr) => curr.copyWith(isItalic: !curr.isItalic),
-                        );
-                      },
-                    ),
-                    _RibbonActionButton(
-                      icon: Icons.format_underlined,
-                      label: 'Underline',
-                      tooltip: 'Underline (Ctrl+U)',
-                      onPressed: () {
-                        widget.state.applyStyleToSelection(
-                          (curr) =>
-                              curr.copyWith(isUnderline: !curr.isUnderline),
-                        );
-                      },
-                    ),
-
-                    _RibbonDivider(),
-
-                    // Alignment Cluster
-                    _RibbonActionButton(
-                      icon: Icons.format_align_left,
-                      label: 'Left',
-                      tooltip: 'Align Left',
-                      onPressed: () {
-                        widget.state.applyStyleToSelection(
-                          (curr) => curr.copyWith(
-                            horizontalAlignment: CellHorizontalAlignment.left,
+                child: _activeTabIndex == 0
+                    ? _buildFileActions()
+                    : Row(
+                        children: [
+                          // Undo / Redo Quick Cluster
+                          _RibbonActionButton(
+                            icon: Icons.undo,
+                            label: 'Undo',
+                            tooltip: 'Undo (Ctrl+Z)',
+                            enabled: widget.state.canUndo,
+                            onPressed: widget.state.canUndo
+                                ? widget.state.undo
+                                : null,
                           ),
-                        );
-                      },
-                    ),
-                    _RibbonActionButton(
-                      icon: Icons.format_align_center,
-                      label: 'Center',
-                      tooltip: 'Align Center',
-                      onPressed: () {
-                        widget.state.applyStyleToSelection(
-                          (curr) => curr.copyWith(
-                            horizontalAlignment: CellHorizontalAlignment.center,
+                          _RibbonActionButton(
+                            icon: Icons.redo,
+                            label: 'Redo',
+                            tooltip: 'Redo (Ctrl+Y)',
+                            enabled: widget.state.canRedo,
+                            onPressed: widget.state.canRedo
+                                ? widget.state.redo
+                                : null,
                           ),
-                        );
-                      },
-                    ),
-                    _RibbonActionButton(
-                      icon: Icons.format_align_right,
-                      label: 'Right',
-                      tooltip: 'Align Right',
-                      onPressed: () {
-                        widget.state.applyStyleToSelection(
-                          (curr) => curr.copyWith(
-                            horizontalAlignment: CellHorizontalAlignment.right,
+
+                          _RibbonDivider(),
+
+                          // Clipboard Cluster
+                          _RibbonActionButton(
+                            icon: Icons.content_paste,
+                            label: 'Paste',
+                            tooltip: 'Paste (Ctrl+V)',
+                            onPressed: () {},
                           ),
-                        );
-                      },
-                    ),
+                          _RibbonActionButton(
+                            icon: Icons.content_cut,
+                            label: 'Cut',
+                            tooltip: 'Cut (Ctrl+X)',
+                            onPressed: () {},
+                          ),
+                          _RibbonActionButton(
+                            icon: Icons.content_copy,
+                            label: 'Copy',
+                            tooltip: 'Copy (Ctrl+C)',
+                            onPressed: () {},
+                          ),
 
-                    _RibbonDivider(),
+                          _RibbonDivider(),
 
-                    // Editing Actions
-                    _RibbonActionButton(
-                      icon: Icons.clear_all,
-                      label: 'Clear',
-                      tooltip: 'Clear Selected Cells (Delete)',
-                      onPressed: widget.state.clearSelection,
-                    ),
-                    _RibbonActionButton(
-                      icon: Icons.functions,
-                      label: 'AutoSum',
-                      tooltip: 'AutoSum (=SUM(...))',
-                      onPressed: () {
-                        widget.state.editActiveCell('=SUM(A1:A10)');
-                      },
-                    ),
-                  ],
-                ),
+                          // Quick Formatting Cluster
+                          _RibbonActionButton(
+                            icon: Icons.format_bold,
+                            label: 'Bold',
+                            tooltip: 'Bold (Ctrl+B)',
+                            onPressed: () {
+                              widget.state.applyStyleToSelection(
+                                (curr) => curr.copyWith(isBold: !curr.isBold),
+                              );
+                            },
+                          ),
+                          _RibbonActionButton(
+                            icon: Icons.format_italic,
+                            label: 'Italic',
+                            tooltip: 'Italic (Ctrl+I)',
+                            onPressed: () {
+                              widget.state.applyStyleToSelection(
+                                (curr) =>
+                                    curr.copyWith(isItalic: !curr.isItalic),
+                              );
+                            },
+                          ),
+                          _RibbonActionButton(
+                            icon: Icons.format_underlined,
+                            label: 'Underline',
+                            tooltip: 'Underline (Ctrl+U)',
+                            onPressed: () {
+                              widget.state.applyStyleToSelection(
+                                (curr) => curr.copyWith(
+                                  isUnderline: !curr.isUnderline,
+                                ),
+                              );
+                            },
+                          ),
+
+                          _RibbonDivider(),
+
+                          // Alignment Cluster
+                          _RibbonActionButton(
+                            icon: Icons.format_align_left,
+                            label: 'Left',
+                            tooltip: 'Align Left',
+                            onPressed: () {
+                              widget.state.applyStyleToSelection(
+                                (curr) => curr.copyWith(
+                                  horizontalAlignment:
+                                      CellHorizontalAlignment.left,
+                                ),
+                              );
+                            },
+                          ),
+                          _RibbonActionButton(
+                            icon: Icons.format_align_center,
+                            label: 'Center',
+                            tooltip: 'Align Center',
+                            onPressed: () {
+                              widget.state.applyStyleToSelection(
+                                (curr) => curr.copyWith(
+                                  horizontalAlignment:
+                                      CellHorizontalAlignment.center,
+                                ),
+                              );
+                            },
+                          ),
+                          _RibbonActionButton(
+                            icon: Icons.format_align_right,
+                            label: 'Right',
+                            tooltip: 'Align Right',
+                            onPressed: () {
+                              widget.state.applyStyleToSelection(
+                                (curr) => curr.copyWith(
+                                  horizontalAlignment:
+                                      CellHorizontalAlignment.right,
+                                ),
+                              );
+                            },
+                          ),
+
+                          _RibbonDivider(),
+
+                          // Editing Actions
+                          _RibbonActionButton(
+                            icon: Icons.clear_all,
+                            label: 'Clear',
+                            tooltip: 'Clear Selected Cells (Delete)',
+                            onPressed: widget.state.clearSelection,
+                          ),
+                          _RibbonActionButton(
+                            icon: Icons.functions,
+                            label: 'AutoSum',
+                            tooltip: 'AutoSum (=SUM(...))',
+                            onPressed: () {
+                              widget.state.editActiveCell('=SUM(A1:A10)');
+                            },
+                          ),
+                        ],
+                      ),
               ),
             ),
         ],
       ),
+    );
+  }
+
+  Widget _buildFileActions() {
+    return Row(
+      children: [
+        _RibbonActionButton(
+          key: const Key('ribbon_file_new_button'),
+          icon: Icons.note_add_outlined,
+          label: 'New',
+          tooltip: 'New Workbook (Ctrl+N)',
+          onPressed: widget.onNew,
+        ),
+        _RibbonActionButton(
+          key: const Key('ribbon_file_open_button'),
+          icon: Icons.folder_open_outlined,
+          label: 'Open',
+          tooltip: 'Open Workbook (Ctrl+O)',
+          onPressed: widget.onOpen,
+        ),
+        _RibbonDivider(),
+        _RibbonActionButton(
+          key: const Key('ribbon_file_save_button'),
+          icon: Icons.save_outlined,
+          label: 'Save',
+          tooltip: 'Save (Ctrl+S)',
+          onPressed: widget.onSave,
+        ),
+        _RibbonActionButton(
+          key: const Key('ribbon_file_save_as_button'),
+          icon: Icons.save_as_outlined,
+          label: 'Save As',
+          tooltip: 'Save As (Ctrl+Shift+S)',
+          onPressed: widget.onSaveAs,
+        ),
+      ],
     );
   }
 }
@@ -314,6 +368,7 @@ class _RibbonTabHeader extends StatelessWidget {
 
 class _RibbonActionButton extends StatelessWidget {
   const _RibbonActionButton({
+    super.key,
     required this.icon,
     required this.label,
     required this.tooltip,
