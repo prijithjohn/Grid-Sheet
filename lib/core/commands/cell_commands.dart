@@ -71,10 +71,18 @@ class ClearRangeCommand extends Command {
   @override
   void execute() {
     if (!_executedOnce) {
-      for (final coord in range.coordinates) {
-        final cell = worksheet.getCell(coord);
-        if (cell != null) {
-          _previousCells[coord] = cell;
+      if (range.cellCount <= 1000) {
+        for (final coord in range.coordinates) {
+          final cell = worksheet.getCell(coord);
+          if (cell != null) {
+            _previousCells[coord] = cell;
+          }
+        }
+      } else {
+        for (final cell in worksheet.populatedCells) {
+          if (range.contains(cell.coordinate)) {
+            _previousCells[cell.coordinate] = cell;
+          }
         }
       }
       _executedOnce = true;

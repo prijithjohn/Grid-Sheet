@@ -30,6 +30,9 @@ class WorkbookState extends ChangeNotifier {
   /// The active workbook aggregate.
   Workbook get workbook => _workbook;
 
+  /// The active workbook title.
+  String get title => _workbook.title;
+
   /// The currently active worksheet tab.
   Worksheet get activeWorksheet => _workbook.activeSheet;
 
