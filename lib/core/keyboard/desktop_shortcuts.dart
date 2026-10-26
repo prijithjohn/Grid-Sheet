@@ -45,12 +45,40 @@ class ToggleUnderlineIntent extends Intent {
   const ToggleUnderlineIntent();
 }
 
+class SaveIntent extends Intent {
+  const SaveIntent();
+}
+
+class SaveAsIntent extends Intent {
+  const SaveAsIntent();
+}
+
+class OpenIntent extends Intent {
+  const OpenIntent();
+}
+
+class NewWorkbookIntent extends Intent {
+  const NewWorkbookIntent();
+}
+
 /// Wraps children with spreadsheet desktop keyboard shortcut listeners.
 class DesktopShortcuts extends StatelessWidget {
-  const DesktopShortcuts({super.key, required this.state, required this.child});
+  const DesktopShortcuts({
+    super.key,
+    required this.state,
+    required this.child,
+    this.onSave,
+    this.onSaveAs,
+    this.onOpen,
+    this.onNew,
+  });
 
   final WorkbookState state;
   final Widget child;
+  final VoidCallback? onSave;
+  final VoidCallback? onSaveAs;
+  final VoidCallback? onOpen;
+  final VoidCallback? onNew;
 
   @override
   Widget build(BuildContext context) {
@@ -111,9 +139,20 @@ class DesktopShortcuts extends StatelessWidget {
             ExtendSelectionIntent(rowDelta: 0, colDelta: 1),
 
         // Formatting
-        SingleActivator(LogicalKeyboardKey.keyB, control: true): ToggleBoldIntent(),
-        SingleActivator(LogicalKeyboardKey.keyI, control: true): ToggleItalicIntent(),
-        SingleActivator(LogicalKeyboardKey.keyU, control: true): ToggleUnderlineIntent(),
+        SingleActivator(LogicalKeyboardKey.keyB, control: true):
+            ToggleBoldIntent(),
+        SingleActivator(LogicalKeyboardKey.keyI, control: true):
+            ToggleItalicIntent(),
+        SingleActivator(LogicalKeyboardKey.keyU, control: true):
+            ToggleUnderlineIntent(),
+
+        // File Operations
+        SingleActivator(LogicalKeyboardKey.keyS, control: true): SaveIntent(),
+        SingleActivator(LogicalKeyboardKey.keyS, control: true, shift: true):
+            SaveAsIntent(),
+        SingleActivator(LogicalKeyboardKey.keyO, control: true): OpenIntent(),
+        SingleActivator(LogicalKeyboardKey.keyN, control: true):
+            NewWorkbookIntent(),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
@@ -179,6 +218,30 @@ class DesktopShortcuts extends StatelessWidget {
                 (curr) => curr.copyWith(isUnderline: !curr.isUnderline),
                 description: 'Toggle Underline',
               );
+              return null;
+            },
+          ),
+          SaveIntent: CallbackAction<SaveIntent>(
+            onInvoke: (_) {
+              onSave?.call();
+              return null;
+            },
+          ),
+          SaveAsIntent: CallbackAction<SaveAsIntent>(
+            onInvoke: (_) {
+              onSaveAs?.call();
+              return null;
+            },
+          ),
+          OpenIntent: CallbackAction<OpenIntent>(
+            onInvoke: (_) {
+              onOpen?.call();
+              return null;
+            },
+          ),
+          NewWorkbookIntent: CallbackAction<NewWorkbookIntent>(
+            onInvoke: (_) {
+              onNew?.call();
               return null;
             },
           ),

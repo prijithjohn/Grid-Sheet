@@ -27,10 +27,7 @@ class WorksheetEvaluationContext implements EvaluationContext {
   @override
   final Workbook? workbook;
 
-  WorksheetEvaluationContext({
-    required this.activeWorksheet,
-    this.workbook,
-  });
+  WorksheetEvaluationContext({required this.activeWorksheet, this.workbook});
 
   Worksheet _resolveSheet(String? sheetName) {
     if (sheetName == null || sheetName.isEmpty) {
@@ -57,7 +54,10 @@ class WorksheetEvaluationContext implements EvaluationContext {
   }
 
   @override
-  Iterable<CellValue> getRangeValues(CellRange range, {String? sheetName}) sync* {
+  Iterable<CellValue> getRangeValues(
+    CellRange range, {
+    String? sheetName,
+  }) sync* {
     final sheet = _resolveSheet(sheetName);
     for (var r = range.topRow; r <= range.bottomRow; r++) {
       for (var c = range.leftCol; c <= range.rightCol; c++) {

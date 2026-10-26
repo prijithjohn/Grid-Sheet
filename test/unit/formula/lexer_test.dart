@@ -8,7 +8,8 @@ void main() {
         FormulaLexer(input).tokenize().toList();
 
     TokenType typeOf(List<FormulaToken> tokens, int i) => tokens[i].type;
-    Object? literalOf(List<FormulaToken> tokens, int i) => tokens[i].literalValue;
+    Object? literalOf(List<FormulaToken> tokens, int i) =>
+        tokens[i].literalValue;
 
     // -------------------------------------------------------------------------
     // Basic single-char operators

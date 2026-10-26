@@ -8,8 +8,8 @@ class FormulaLexer {
   final List<FormulaToken> _tokens = [];
 
   FormulaLexer(String input)
-      : source = input.startsWith('=') ? input.substring(1) : input,
-        _length = (input.startsWith('=') ? input.substring(1) : input).length;
+    : source = input.startsWith('=') ? input.substring(1) : input,
+      _length = (input.startsWith('=') ? input.substring(1) : input).length;
 
   /// Tokenizes the source expression and returns all tokens including [TokenType.eof].
   List<FormulaToken> tokenize() {
@@ -74,8 +74,12 @@ class FormulaLexer {
           if (_match('=')) {
             _addToken(TokenType.notEqual, '!=', startPos);
           } else {
-            _addToken(TokenType.error, '!', startPos,
-                literalValue: 'Unexpected character: !');
+            _addToken(
+              TokenType.error,
+              '!',
+              startPos,
+              literalValue: 'Unexpected character: !',
+            );
           }
           break;
         case '"':
@@ -91,18 +95,20 @@ class FormulaLexer {
           } else if (_isAlpha(c) || c == r'$') {
             _identifierOrReference(startPos);
           } else {
-            _addToken(TokenType.error, c, startPos,
-                literalValue: 'Unexpected character: $c');
+            _addToken(
+              TokenType.error,
+              c,
+              startPos,
+              literalValue: 'Unexpected character: $c',
+            );
           }
           break;
       }
     }
 
-    _tokens.add(FormulaToken(
-      type: TokenType.eof,
-      lexeme: '',
-      position: _current,
-    ));
+    _tokens.add(
+      FormulaToken(type: TokenType.eof, lexeme: '', position: _current),
+    );
 
     return List.unmodifiable(_tokens);
   }
@@ -129,12 +135,14 @@ class FormulaLexer {
           _advance();
         } else {
           // End of string
-          _tokens.add(FormulaToken(
-            type: TokenType.string,
-            lexeme: source.substring(startPos, _current),
-            literalValue: buffer.toString(),
-            position: startPos,
-          ));
+          _tokens.add(
+            FormulaToken(
+              type: TokenType.string,
+              lexeme: source.substring(startPos, _current),
+              literalValue: buffer.toString(),
+              position: startPos,
+            ),
+          );
           return;
         }
       } else {
@@ -143,12 +151,14 @@ class FormulaLexer {
     }
 
     // Unterminated string
-    _tokens.add(FormulaToken(
-      type: TokenType.error,
-      lexeme: source.substring(startPos, _current),
-      literalValue: 'Unterminated string literal',
-      position: startPos,
-    ));
+    _tokens.add(
+      FormulaToken(
+        type: TokenType.error,
+        lexeme: source.substring(startPos, _current),
+        literalValue: 'Unterminated string literal',
+        position: startPos,
+      ),
+    );
   }
 
   void _singleQuotedSheetReference(int startPos) {
@@ -157,12 +167,14 @@ class FormulaLexer {
       _advance();
     }
     if (_isAtEnd) {
-      _tokens.add(FormulaToken(
-        type: TokenType.error,
-        lexeme: source.substring(startPos, _current),
-        literalValue: 'Unterminated sheet name in reference',
-        position: startPos,
-      ));
+      _tokens.add(
+        FormulaToken(
+          type: TokenType.error,
+          lexeme: source.substring(startPos, _current),
+          literalValue: 'Unterminated sheet name in reference',
+          position: startPos,
+        ),
+      );
       return;
     }
     _advance(); // consume closing '
@@ -175,20 +187,24 @@ class FormulaLexer {
         _advance();
       }
       final lexeme = source.substring(startPos, _current);
-      _tokens.add(FormulaToken(
-        type: TokenType.cellReference,
-        lexeme: lexeme,
-        literalValue: lexeme,
-        position: startPos,
-      ));
+      _tokens.add(
+        FormulaToken(
+          type: TokenType.cellReference,
+          lexeme: lexeme,
+          literalValue: lexeme,
+          position: startPos,
+        ),
+      );
     } else {
       final lexeme = source.substring(startPos, _current);
-      _tokens.add(FormulaToken(
-        type: TokenType.error,
-        lexeme: lexeme,
-        literalValue: "Expected '!' after sheet name",
-        position: startPos,
-      ));
+      _tokens.add(
+        FormulaToken(
+          type: TokenType.error,
+          lexeme: lexeme,
+          literalValue: "Expected '!' after sheet name",
+          position: startPos,
+        ),
+      );
     }
   }
 
@@ -222,16 +238,19 @@ class FormulaLexer {
 
     final lexeme = source.substring(startPos, _current);
     final numValue = num.tryParse(lexeme);
-    _tokens.add(FormulaToken(
-      type: TokenType.number,
-      lexeme: lexeme,
-      literalValue: numValue ?? 0,
-      position: startPos,
-    ));
+    _tokens.add(
+      FormulaToken(
+        type: TokenType.number,
+        lexeme: lexeme,
+        literalValue: numValue ?? 0,
+        position: startPos,
+      ),
+    );
   }
 
   void _identifierOrReference(int startPos) {
-    while (!_isAtEnd && (_isAlphaNumeric(_peek) || _peek == r'$' || _peek == '_')) {
+    while (!_isAtEnd &&
+        (_isAlphaNumeric(_peek) || _peek == r'$' || _peek == '_')) {
       _advance();
     }
 
@@ -242,12 +261,14 @@ class FormulaLexer {
         _advance();
       }
       final lexeme = source.substring(startPos, _current);
-      _tokens.add(FormulaToken(
-        type: TokenType.cellReference,
-        lexeme: lexeme,
-        literalValue: lexeme,
-        position: startPos,
-      ));
+      _tokens.add(
+        FormulaToken(
+          type: TokenType.cellReference,
+          lexeme: lexeme,
+          literalValue: lexeme,
+          position: startPos,
+        ),
+      );
       return;
     }
 
@@ -257,57 +278,68 @@ class FormulaLexer {
     // Check if followed by '(' -> function call identifier
     _skipWhitespace();
     if (!_isAtEnd && _peek == '(') {
-      _tokens.add(FormulaToken(
-        type: TokenType.identifier,
-        lexeme: upper,
-        literalValue: upper,
-        position: startPos,
-      ));
+      _tokens.add(
+        FormulaToken(
+          type: TokenType.identifier,
+          lexeme: upper,
+          literalValue: upper,
+          position: startPos,
+        ),
+      );
       return;
     }
 
     // Check boolean literals
     if (upper == 'TRUE') {
-      _tokens.add(FormulaToken(
-        type: TokenType.boolean,
-        lexeme: lexeme,
-        literalValue: true,
-        position: startPos,
-      ));
+      _tokens.add(
+        FormulaToken(
+          type: TokenType.boolean,
+          lexeme: lexeme,
+          literalValue: true,
+          position: startPos,
+        ),
+      );
       return;
     }
     if (upper == 'FALSE') {
-      _tokens.add(FormulaToken(
-        type: TokenType.boolean,
-        lexeme: lexeme,
-        literalValue: false,
-        position: startPos,
-      ));
+      _tokens.add(
+        FormulaToken(
+          type: TokenType.boolean,
+          lexeme: lexeme,
+          literalValue: false,
+          position: startPos,
+        ),
+      );
       return;
     }
 
     // Check if it matches cell coordinate pattern (e.g. A1, $A$1, B$10, $XFD1048576)
     if (_isCellCoordinate(lexeme)) {
-      _tokens.add(FormulaToken(
-        type: TokenType.cellReference,
-        lexeme: lexeme,
-        literalValue: lexeme,
-        position: startPos,
-      ));
+      _tokens.add(
+        FormulaToken(
+          type: TokenType.cellReference,
+          lexeme: lexeme,
+          literalValue: lexeme,
+          position: startPos,
+        ),
+      );
       return;
     }
 
     // Otherwise, generic identifier / function without parentheses yet
-    _tokens.add(FormulaToken(
-      type: TokenType.identifier,
-      lexeme: upper,
-      literalValue: upper,
-      position: startPos,
-    ));
+    _tokens.add(
+      FormulaToken(
+        type: TokenType.identifier,
+        lexeme: upper,
+        literalValue: upper,
+        position: startPos,
+      ),
+    );
   }
 
-  static final RegExp _cellCoordRegex =
-      RegExp(r'^\$?([A-Za-z]{1,3})\$?([1-9][0-9]{0,6})$');
+  static final RegExp _cellCoordRegex = RegExp(
+    r'^\$?([A-Za-z]{1,3})\$?([1-9][0-9]{0,6})$',
+  );
 
   bool _isCellCoordinate(String str) {
     final match = _cellCoordRegex.firstMatch(str);
@@ -351,20 +383,28 @@ class FormulaLexer {
   bool _isAlpha(String s) {
     if (s.isEmpty) return false;
     final code = s.codeUnitAt(0);
-    return (code >= 65 && code <= 90) || (code >= 97 && code <= 122) || code == 95; // _
+    return (code >= 65 && code <= 90) ||
+        (code >= 97 && code <= 122) ||
+        code == 95; // _
   }
 
   bool _isAlphaNumeric(String s) {
     return _isAlpha(s) || _isDigit(s);
   }
 
-  void _addToken(TokenType type, String lexeme, int position,
-      {Object? literalValue}) {
-    _tokens.add(FormulaToken(
-      type: type,
-      lexeme: lexeme,
-      position: position,
-      literalValue: literalValue,
-    ));
+  void _addToken(
+    TokenType type,
+    String lexeme,
+    int position, {
+    Object? literalValue,
+  }) {
+    _tokens.add(
+      FormulaToken(
+        type: type,
+        lexeme: lexeme,
+        position: position,
+        literalValue: literalValue,
+      ),
+    );
   }
 }

@@ -53,14 +53,20 @@ class FunctionRegistry {
 
     for (final arg in args) {
       if (arg is RangeReferenceNode) {
-        for (final val in context.getRangeValues(arg.range, sheetName: arg.sheetName)) {
+        for (final val in context.getRangeValues(
+          arg.range,
+          sheetName: arg.sheetName,
+        )) {
           if (val is ErrorCellValue) return val;
           if (val is NumberCellValue) {
             sum += val.value;
           }
         }
       } else if (arg is CellReferenceNode) {
-        final val = context.getCellValue(arg.coordinate, sheetName: arg.sheetName);
+        final val = context.getCellValue(
+          arg.coordinate,
+          sheetName: arg.sheetName,
+        );
         if (val is ErrorCellValue) return val;
         if (val is NumberCellValue) {
           sum += val.value;
@@ -96,7 +102,10 @@ class FunctionRegistry {
 
     for (final arg in args) {
       if (arg is RangeReferenceNode) {
-        for (final val in context.getRangeValues(arg.range, sheetName: arg.sheetName)) {
+        for (final val in context.getRangeValues(
+          arg.range,
+          sheetName: arg.sheetName,
+        )) {
           if (val is ErrorCellValue) return val;
           if (val is NumberCellValue) {
             sum += val.value;
@@ -104,7 +113,10 @@ class FunctionRegistry {
           }
         }
       } else if (arg is CellReferenceNode) {
-        final val = context.getCellValue(arg.coordinate, sheetName: arg.sheetName);
+        final val = context.getCellValue(
+          arg.coordinate,
+          sheetName: arg.sheetName,
+        );
         if (val is ErrorCellValue) return val;
         if (val is NumberCellValue) {
           sum += val.value;
@@ -146,27 +158,41 @@ class FunctionRegistry {
 
     for (final arg in args) {
       if (arg is RangeReferenceNode) {
-        for (final val in context.getRangeValues(arg.range, sheetName: arg.sheetName)) {
+        for (final val in context.getRangeValues(
+          arg.range,
+          sheetName: arg.sheetName,
+        )) {
           if (val is ErrorCellValue) return val;
           if (val is NumberCellValue) {
-            minVal = minVal == null ? val.value : (val.value < minVal ? val.value : minVal);
+            minVal = minVal == null
+                ? val.value
+                : (val.value < minVal ? val.value : minVal);
           }
         }
       } else if (arg is CellReferenceNode) {
-        final val = context.getCellValue(arg.coordinate, sheetName: arg.sheetName);
+        final val = context.getCellValue(
+          arg.coordinate,
+          sheetName: arg.sheetName,
+        );
         if (val is ErrorCellValue) return val;
         if (val is NumberCellValue) {
-          minVal = minVal == null ? val.value : (val.value < minVal ? val.value : minVal);
+          minVal = minVal == null
+              ? val.value
+              : (val.value < minVal ? val.value : minVal);
         }
       } else {
         final val = evaluator.evaluate(arg, context);
         if (val is ErrorCellValue) return val;
         if (val is NumberCellValue) {
-          minVal = minVal == null ? val.value : (val.value < minVal ? val.value : minVal);
+          minVal = minVal == null
+              ? val.value
+              : (val.value < minVal ? val.value : minVal);
         } else if (val is TextCellValue) {
           final parsed = num.tryParse(val.text.trim());
           if (parsed != null) {
-            minVal = minVal == null ? parsed : (parsed < minVal ? parsed : minVal);
+            minVal = minVal == null
+                ? parsed
+                : (parsed < minVal ? parsed : minVal);
           } else {
             return const ErrorCellValue(CellError.value);
           }
@@ -186,27 +212,41 @@ class FunctionRegistry {
 
     for (final arg in args) {
       if (arg is RangeReferenceNode) {
-        for (final val in context.getRangeValues(arg.range, sheetName: arg.sheetName)) {
+        for (final val in context.getRangeValues(
+          arg.range,
+          sheetName: arg.sheetName,
+        )) {
           if (val is ErrorCellValue) return val;
           if (val is NumberCellValue) {
-            maxVal = maxVal == null ? val.value : (val.value > maxVal ? val.value : maxVal);
+            maxVal = maxVal == null
+                ? val.value
+                : (val.value > maxVal ? val.value : maxVal);
           }
         }
       } else if (arg is CellReferenceNode) {
-        final val = context.getCellValue(arg.coordinate, sheetName: arg.sheetName);
+        final val = context.getCellValue(
+          arg.coordinate,
+          sheetName: arg.sheetName,
+        );
         if (val is ErrorCellValue) return val;
         if (val is NumberCellValue) {
-          maxVal = maxVal == null ? val.value : (val.value > maxVal ? val.value : maxVal);
+          maxVal = maxVal == null
+              ? val.value
+              : (val.value > maxVal ? val.value : maxVal);
         }
       } else {
         final val = evaluator.evaluate(arg, context);
         if (val is ErrorCellValue) return val;
         if (val is NumberCellValue) {
-          maxVal = maxVal == null ? val.value : (val.value > maxVal ? val.value : maxVal);
+          maxVal = maxVal == null
+              ? val.value
+              : (val.value > maxVal ? val.value : maxVal);
         } else if (val is TextCellValue) {
           final parsed = num.tryParse(val.text.trim());
           if (parsed != null) {
-            maxVal = maxVal == null ? parsed : (parsed > maxVal ? parsed : maxVal);
+            maxVal = maxVal == null
+                ? parsed
+                : (parsed > maxVal ? parsed : maxVal);
           } else {
             return const ErrorCellValue(CellError.value);
           }
@@ -226,17 +266,24 @@ class FunctionRegistry {
 
     for (final arg in args) {
       if (arg is RangeReferenceNode) {
-        for (final val in context.getRangeValues(arg.range, sheetName: arg.sheetName)) {
+        for (final val in context.getRangeValues(
+          arg.range,
+          sheetName: arg.sheetName,
+        )) {
           if (val is NumberCellValue) count++;
         }
       } else if (arg is CellReferenceNode) {
-        final val = context.getCellValue(arg.coordinate, sheetName: arg.sheetName);
+        final val = context.getCellValue(
+          arg.coordinate,
+          sheetName: arg.sheetName,
+        );
         if (val is NumberCellValue) count++;
       } else {
         final val = evaluator.evaluate(arg, context);
         if (val is NumberCellValue) {
           count++;
-        } else if (val is TextCellValue && num.tryParse(val.text.trim()) != null) {
+        } else if (val is TextCellValue &&
+            num.tryParse(val.text.trim()) != null) {
           count++;
         }
       }
@@ -254,11 +301,17 @@ class FunctionRegistry {
 
     for (final arg in args) {
       if (arg is RangeReferenceNode) {
-        for (final val in context.getRangeValues(arg.range, sheetName: arg.sheetName)) {
+        for (final val in context.getRangeValues(
+          arg.range,
+          sheetName: arg.sheetName,
+        )) {
           if (val is! EmptyCellValue) count++;
         }
       } else if (arg is CellReferenceNode) {
-        final val = context.getCellValue(arg.coordinate, sheetName: arg.sheetName);
+        final val = context.getCellValue(
+          arg.coordinate,
+          sheetName: arg.sheetName,
+        );
         if (val is! EmptyCellValue) count++;
       } else {
         final val = evaluator.evaluate(arg, context);
@@ -330,7 +383,9 @@ class FunctionRegistry {
     FormulaEvaluator evaluator,
     EvaluationContext context,
   ) {
-    if (args.isEmpty || args.length > 2) return const ErrorCellValue(CellError.value);
+    if (args.isEmpty || args.length > 2) {
+      return const ErrorCellValue(CellError.value);
+    }
     final val = evaluator.evaluate(args[0], context);
     if (val is ErrorCellValue) return val;
 

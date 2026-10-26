@@ -67,7 +67,10 @@ void main() {
       test('evaluates IF formula', () {
         engine.setCellInput(sheet, CellCoordinate.fromA1('A1'), '10');
         engine.setCellInput(
-            sheet, CellCoordinate.fromA1('B1'), '=IF(A1>5,"big","small")');
+          sheet,
+          CellCoordinate.fromA1('B1'),
+          '=IF(A1>5,"big","small")',
+        );
         expect(computed(sheet, 'B1'), const TextCellValue('big'));
       });
     });
@@ -117,8 +120,10 @@ void main() {
         engine.setCellInput(sheet, CellCoordinate.fromA1('B1'), '99');
         expect(computed(sheet, 'B1'), const NumberCellValue(99));
         // No longer a formula — dependency on A1 should be gone
-        expect(engine.dependencyGraph.hasFormula(CellCoordinate.fromA1('B1')),
-            isFalse);
+        expect(
+          engine.dependencyGraph.hasFormula(CellCoordinate.fromA1('B1')),
+          isFalse,
+        );
       });
     });
 
@@ -135,8 +140,10 @@ void main() {
       test('removing formula cell clears dependency graph entry', () {
         engine.setCellInput(sheet, CellCoordinate.fromA1('A1'), '=B1+1');
         engine.removeCell(sheet, CellCoordinate.fromA1('A1'));
-        expect(engine.dependencyGraph.hasFormula(CellCoordinate.fromA1('A1')),
-            isFalse);
+        expect(
+          engine.dependencyGraph.hasFormula(CellCoordinate.fromA1('A1')),
+          isFalse,
+        );
       });
 
       test('dependents of removed cell recalculate to empty/0', () {
@@ -156,8 +163,7 @@ void main() {
     group('circular reference handling', () {
       test('direct self-reference produces #CIRCULAR!', () {
         engine.setCellInput(sheet, CellCoordinate.fromA1('A1'), '=A1');
-        expect(computed(sheet, 'A1'),
-            const ErrorCellValue(CellError.circular));
+        expect(computed(sheet, 'A1'), const ErrorCellValue(CellError.circular));
       });
 
       test('indirect circular reference A1->B1->A1', () {

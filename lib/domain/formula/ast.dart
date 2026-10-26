@@ -238,10 +238,7 @@ class FunctionCallNode extends FormulaNode {
   final String functionName;
   final List<FormulaNode> arguments;
 
-  const FunctionCallNode({
-    required this.functionName,
-    required this.arguments,
-  });
+  const FunctionCallNode({required this.functionName, required this.arguments});
 
   @override
   T accept<T>(FormulaVisitor<T> visitor) => visitor.visitFunctionCall(this);

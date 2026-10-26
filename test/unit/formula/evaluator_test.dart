@@ -254,7 +254,10 @@ void main() {
       });
 
       test('AVERAGE of empty range returns #DIV/0!', () {
-        expect(eval('=AVERAGE(Z1:Z5)'), const ErrorCellValue(CellError.divZero));
+        expect(
+          eval('=AVERAGE(Z1:Z5)'),
+          const ErrorCellValue(CellError.divZero),
+        );
       });
     });
 
