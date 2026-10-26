@@ -11,7 +11,7 @@ import 'csv_service.dart' show BatchImportCommand;
 /// the standard interchange format understood by Excel, Google Sheets, etc.
 class ClipboardManager {
   const ClipboardManager({CsvEngine? engine})
-      : _engine = engine ?? const CsvEngine();
+    : _engine = engine ?? const CsvEngine();
 
   final CsvEngine _engine;
 

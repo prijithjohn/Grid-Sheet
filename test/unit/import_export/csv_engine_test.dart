@@ -110,10 +110,7 @@ void main() {
 
   group('CsvEngine.parseString — tab delimiter', () {
     test('parses TSV row', () {
-      final rows = engine.parseString(
-        'a\tb\tc',
-        delimiter: CsvDelimiter.tab,
-      );
+      final rows = engine.parseString('a\tb\tc', delimiter: CsvDelimiter.tab);
       expect(rows, [
         ['a', 'b', 'c'],
       ]);

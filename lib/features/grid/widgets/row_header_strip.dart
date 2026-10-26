@@ -33,12 +33,13 @@ class RowHeaderStrip extends StatelessWidget {
     while (currentY < scrollY + viewportHeight &&
         row < CellCoordinate.maxRows) {
       final height = worksheet.getRowHeight(row);
-      if (currentY + height >= scrollY) {
+      if (height > 0 && currentY + height >= scrollY) {
         visibleRows.add(
           _VisibleRowInfo(
             rowIndex: row,
             startY: currentY - scrollY,
             height: height,
+            hasHiddenPreceding: row > 0 && worksheet.isRowHidden(row - 1),
           ),
         );
       }
@@ -63,6 +64,7 @@ class RowHeaderStrip extends StatelessWidget {
                     selection.mode == SelectionMode.entireSheet ||
                     (selection.activeRange.topRow <= info.rowIndex &&
                         info.rowIndex <= selection.activeRange.bottomRow),
+                hasHiddenPreceding: info.hasHiddenPreceding,
                 onTap: () => state.selectEntireRow(info.rowIndex),
               ),
             ),
@@ -89,11 +91,13 @@ class _VisibleRowInfo {
     required this.rowIndex,
     required this.startY,
     required this.height,
+    this.hasHiddenPreceding = false,
   });
 
   final int rowIndex;
   final double startY;
   final double height;
+  final bool hasHiddenPreceding;
 }
 
 class _RowHeaderCell extends StatelessWidget {
@@ -101,20 +105,25 @@ class _RowHeaderCell extends StatelessWidget {
     required this.rowIndex,
     required this.isSelected,
     required this.onTap,
+    this.hasHiddenPreceding = false,
   });
 
   final int rowIndex;
   final bool isSelected;
   final VoidCallback onTap;
+  final bool hasHiddenPreceding;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: isSelected ? AppColors.selectionFill : AppColors.recessedChrome,
-        border: const Border(
-          right: BorderSide(color: AppColors.neutralBorder, width: 1),
-          bottom: BorderSide(color: AppColors.neutralBorder, width: 1),
+        border: Border(
+          top: hasHiddenPreceding
+              ? const BorderSide(color: AppColors.primary, width: 2)
+              : BorderSide.none,
+          right: const BorderSide(color: AppColors.neutralBorder, width: 1),
+          bottom: const BorderSide(color: AppColors.neutralBorder, width: 1),
         ),
       ),
       child: Center(

@@ -24,10 +24,18 @@ class SelectionPainter extends CustomPainter {
     final range = selection.activeRange;
 
     // Calculate selection bounding box in pixel coordinates
-    final startX = _getColumnOffset(range.start.col) - scrollX;
-    final endX = _getColumnOffset(range.end.col + 1) - scrollX;
-    final startY = _getRowOffset(range.start.row) - scrollY;
-    final endY = _getRowOffset(range.end.row + 1) - scrollY;
+    final startX = range.start.col < worksheet.frozenCols
+        ? _getColumnOffset(range.start.col)
+        : _getColumnOffset(range.start.col) - scrollX;
+    final endX = range.end.col < worksheet.frozenCols
+        ? _getColumnOffset(range.end.col + 1)
+        : _getColumnOffset(range.end.col + 1) - scrollX;
+    final startY = range.start.row < worksheet.frozenRows
+        ? _getRowOffset(range.start.row)
+        : _getRowOffset(range.start.row) - scrollY;
+    final endY = range.end.row < worksheet.frozenRows
+        ? _getRowOffset(range.end.row + 1)
+        : _getRowOffset(range.end.row + 1) - scrollY;
 
     final rect = Rect.fromLTRB(startX, startY, endX, endY);
 

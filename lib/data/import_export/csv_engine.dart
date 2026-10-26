@@ -117,10 +117,9 @@ class CsvEngine {
   }) async {
     final content = writeString(rows, delimiter: delimiter);
     final codec = _codecFor(encoding);
-    final bytes =
-        encoding == CsvEncoding.utf8bom
-            ? <int>[0xEF, 0xBB, 0xBF, ...codec.encode(content)]
-            : codec.encode(content);
+    final bytes = encoding == CsvEncoding.utf8bom
+        ? <int>[0xEF, 0xBB, 0xBF, ...codec.encode(content)]
+        : codec.encode(content);
     await file.writeAsBytes(bytes, flush: true);
   }
 
@@ -132,10 +131,7 @@ class CsvEngine {
   ///
   /// Analyses frequency consistency of candidate delimiters across the first
   /// [maxLines] lines and returns a confidence-ranked result.
-  DelimiterDetectionResult detectDelimiter(
-    String sample, {
-    int maxLines = 20,
-  }) {
+  DelimiterDetectionResult detectDelimiter(String sample, {int maxLines = 20}) {
     final lines = _splitLines(sample).take(maxLines).toList();
     if (lines.isEmpty) {
       return const DelimiterDetectionResult(
@@ -258,8 +254,7 @@ class CsvEngine {
     final mode = counts.fold<int>(0, (a, b) => a + b) ~/ counts.length;
     if (mode == 0) return 0.0;
 
-    final consistent =
-        counts.where((c) => c == mode).length / counts.length;
+    final consistent = counts.where((c) => c == mode).length / counts.length;
     // Normalise by expected columns to avoid favouring high-count delimiters
     return consistent * (1 - 1 / (mode + 1));
   }

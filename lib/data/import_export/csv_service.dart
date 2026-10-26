@@ -156,10 +156,9 @@ class CsvService {
         );
       }
 
-      final dataRows =
-          options.firstRowIsHeader && rows.length > 1
-              ? rows.sublist(1)
-              : rows;
+      final dataRows = options.firstRowIsHeader && rows.length > 1
+          ? rows.sublist(1)
+          : rows;
 
       final origin = _resolveOrigin(state, options.destination);
 
@@ -189,8 +188,10 @@ class CsvService {
         state.executeBatchImport(cmd);
       }
 
-      final maxCols =
-          dataRows.fold<int>(0, (m, r) => r.length > m ? r.length : m);
+      final maxCols = dataRows.fold<int>(
+        0,
+        (m, r) => r.length > m ? r.length : m,
+      );
       return CsvOperationResult(
         success: true,
         rowsAffected: dataRows.length,
@@ -233,8 +234,10 @@ class CsvService {
       return CsvOperationResult(
         success: true,
         rowsAffected: rows.length,
-        columnsAffected:
-            rows.fold<int>(0, (m, r) => r.length > m ? r.length : m),
+        columnsAffected: rows.fold<int>(
+          0,
+          (m, r) => r.length > m ? r.length : m,
+        ),
         filePath: filePath,
       );
     } catch (_) {
@@ -272,8 +275,7 @@ class CsvService {
     return rows;
   }
 
-  String _stripBom(String s) =>
-      s.startsWith('\uFEFF') ? s.substring(1) : s;
+  String _stripBom(String s) => s.startsWith('\uFEFF') ? s.substring(1) : s;
 
   String _baseName(String path) {
     final base = path.replaceAll('\\', '/').split('/').last;

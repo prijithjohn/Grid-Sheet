@@ -73,6 +73,22 @@ class PasteIntent extends Intent {
   const PasteIntent();
 }
 
+class FindIntent extends Intent {
+  const FindIntent();
+}
+
+class ReplaceIntent extends Intent {
+  const ReplaceIntent();
+}
+
+class FillDownIntent extends Intent {
+  const FillDownIntent();
+}
+
+class FillRightIntent extends Intent {
+  const FillRightIntent();
+}
+
 /// Wraps children with spreadsheet desktop keyboard shortcut listeners.
 class DesktopShortcuts extends StatelessWidget {
   const DesktopShortcuts({
@@ -86,6 +102,10 @@ class DesktopShortcuts extends StatelessWidget {
     this.onCopy,
     this.onCut,
     this.onPaste,
+    this.onFind,
+    this.onReplace,
+    this.onFillDown,
+    this.onFillRight,
   });
 
   final WorkbookState state;
@@ -97,6 +117,10 @@ class DesktopShortcuts extends StatelessWidget {
   final VoidCallback? onCopy;
   final VoidCallback? onCut;
   final VoidCallback? onPaste;
+  final VoidCallback? onFind;
+  final VoidCallback? onReplace;
+  final VoidCallback? onFillDown;
+  final VoidCallback? onFillRight;
 
   @override
   Widget build(BuildContext context) {
@@ -176,6 +200,15 @@ class DesktopShortcuts extends StatelessWidget {
         SingleActivator(LogicalKeyboardKey.keyC, control: true): CopyIntent(),
         SingleActivator(LogicalKeyboardKey.keyX, control: true): CutIntent(),
         SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteIntent(),
+
+        // Workflows: Find, Replace, Fill Down, Fill Right
+        SingleActivator(LogicalKeyboardKey.keyF, control: true): FindIntent(),
+        SingleActivator(LogicalKeyboardKey.keyH, control: true):
+            ReplaceIntent(),
+        SingleActivator(LogicalKeyboardKey.keyD, control: true):
+            FillDownIntent(),
+        SingleActivator(LogicalKeyboardKey.keyR, control: true):
+            FillRightIntent(),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
@@ -187,10 +220,42 @@ class DesktopShortcuts extends StatelessWidget {
           SelectAllIntent: CallbackAction<SelectAllIntent>(
             onInvoke: (_) => state.selectAll(),
           ),
+          FindIntent: CallbackAction<FindIntent>(
+            onInvoke: (_) {
+              onFind?.call();
+              return null;
+            },
+          ),
+          ReplaceIntent: CallbackAction<ReplaceIntent>(
+            onInvoke: (_) {
+              onReplace?.call();
+              return null;
+            },
+          ),
+          FillDownIntent: CallbackAction<FillDownIntent>(
+            onInvoke: (_) {
+              if (onFillDown != null) {
+                onFillDown!();
+              } else {
+                state.fillDownSelection();
+              }
+              return null;
+            },
+          ),
+          FillRightIntent: CallbackAction<FillRightIntent>(
+            onInvoke: (_) {
+              if (onFillRight != null) {
+                onFillRight!();
+              } else {
+                state.fillRightSelection();
+              }
+              return null;
+            },
+          ),
           MoveCursorIntent: CallbackAction<MoveCursorIntent>(
             onInvoke: (intent) {
               final curr = state.selection.primaryCell;
-              final newRow = (curr.row + intent.rowDelta).clamp(
+              var newRow = (curr.row + intent.rowDelta).clamp(
                 0,
                 CellCoordinate.maxRows - 1,
               );
@@ -198,6 +263,17 @@ class DesktopShortcuts extends StatelessWidget {
                 0,
                 CellCoordinate.maxCols - 1,
               );
+
+              // Skip hidden rows
+              if (intent.rowDelta != 0) {
+                final sheet = state.activeWorksheet;
+                while (sheet.isRowHidden(newRow) &&
+                    newRow > 0 &&
+                    newRow < CellCoordinate.maxRows - 1) {
+                  newRow += intent.rowDelta > 0 ? 1 : -1;
+                }
+              }
+
               state.selectCell(curr.copyWith(row: newRow, col: newCol));
               return null;
             },
@@ -205,7 +281,7 @@ class DesktopShortcuts extends StatelessWidget {
           ExtendSelectionIntent: CallbackAction<ExtendSelectionIntent>(
             onInvoke: (intent) {
               final active = state.selection.activeRange.end;
-              final newRow = (active.row + intent.rowDelta).clamp(
+              var newRow = (active.row + intent.rowDelta).clamp(
                 0,
                 CellCoordinate.maxRows - 1,
               );
@@ -213,6 +289,17 @@ class DesktopShortcuts extends StatelessWidget {
                 0,
                 CellCoordinate.maxCols - 1,
               );
+
+              // Skip hidden rows
+              if (intent.rowDelta != 0) {
+                final sheet = state.activeWorksheet;
+                while (sheet.isRowHidden(newRow) &&
+                    newRow > 0 &&
+                    newRow < CellCoordinate.maxRows - 1) {
+                  newRow += intent.rowDelta > 0 ? 1 : -1;
+                }
+              }
+
               state.extendSelection(active.copyWith(row: newRow, col: newCol));
               return null;
             },

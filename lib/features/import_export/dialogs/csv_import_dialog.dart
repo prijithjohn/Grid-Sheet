@@ -125,10 +125,7 @@ class _CsvImportDialogState extends State<CsvImportDialog> {
   }
 
   Widget _buildHeader() {
-    final fileName = widget.file.path
-        .replaceAll('\\', '/')
-        .split('/')
-        .last;
+    final fileName = widget.file.path.replaceAll('\\', '/').split('/').last;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
       child: Row(
@@ -186,9 +183,7 @@ class _CsvImportDialogState extends State<CsvImportDialog> {
         DropdownButton<CsvDelimiter>(
           value: _delimiter,
           items: CsvDelimiter.values
-              .map(
-                (d) => DropdownMenuItem(value: d, child: Text(d.label)),
-              )
+              .map((d) => DropdownMenuItem(value: d, child: Text(d.label)))
               .toList(),
           onChanged: (v) {
             if (v != null && v != _delimiter) {
@@ -212,9 +207,7 @@ class _CsvImportDialogState extends State<CsvImportDialog> {
         DropdownButton<CsvEncoding>(
           value: _encoding,
           items: CsvEncoding.values
-              .map(
-                (e) => DropdownMenuItem(value: e, child: Text(e.label)),
-              )
+              .map((e) => DropdownMenuItem(value: e, child: Text(e.label)))
               .toList(),
           onChanged: (v) {
             if (v != null && v != _encoding) {
@@ -238,9 +231,7 @@ class _CsvImportDialogState extends State<CsvImportDialog> {
         DropdownButton<CsvImportDestination>(
           value: _destination,
           items: CsvImportDestination.values
-              .map(
-                (d) => DropdownMenuItem(value: d, child: Text(d.label)),
-              )
+              .map((d) => DropdownMenuItem(value: d, child: Text(d.label)))
               .toList(),
           onChanged: (v) {
             if (v != null) setState(() => _destination = v);
@@ -262,10 +253,7 @@ class _CsvImportDialogState extends State<CsvImportDialog> {
           visualDensity: VisualDensity.compact,
         ),
         const SizedBox(width: 4),
-        Text(
-          'First row contains column headers',
-          style: _dropdownStyle(),
-        ),
+        Text('First row contains column headers', style: _dropdownStyle()),
       ],
     );
   }
@@ -298,15 +286,13 @@ class _CsvImportDialogState extends State<CsvImportDialog> {
       (m, r) => r.length > m ? r.length : m,
     );
 
-    final displayRows =
-        _firstRowIsHeader && _previewRows.length > 1
-            ? _previewRows.sublist(1)
-            : _previewRows;
+    final displayRows = _firstRowIsHeader && _previewRows.length > 1
+        ? _previewRows.sublist(1)
+        : _previewRows;
 
-    final headers =
-        _firstRowIsHeader && _previewRows.isNotEmpty
-            ? _previewRows.first
-            : null;
+    final headers = _firstRowIsHeader && _previewRows.isNotEmpty
+        ? _previewRows.first
+        : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -466,7 +452,7 @@ class _CsvImportDialogState extends State<CsvImportDialog> {
 /// pick file → show preview dialog → execute import into [WorkbookState].
 class CsvImportWorkflow {
   const CsvImportWorkflow({CsvService? service})
-      : _service = service ?? const CsvService();
+    : _service = service ?? const CsvService();
 
   final CsvService _service;
 

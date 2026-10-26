@@ -133,6 +133,159 @@ class WorkbookState extends ChangeNotifier {
     _executeCommand(cmd);
   }
 
+  /// Fills the top row of the active selection down through the range.
+  void fillDownSelection() {
+    final range = _selection.activeRange;
+    if (range.topRow < range.bottomRow) {
+      final cmd = FillDownCommand(
+        worksheet: activeWorksheet,
+        range: range,
+        engine: _engine,
+        workbook: _workbook,
+      );
+      _executeCommand(cmd);
+    }
+  }
+
+  /// Fills the leftmost column of the active selection right through the range.
+  void fillRightSelection() {
+    final range = _selection.activeRange;
+    if (range.leftCol < range.rightCol) {
+      final cmd = FillRightCommand(
+        worksheet: activeWorksheet,
+        range: range,
+        engine: _engine,
+        workbook: _workbook,
+      );
+      _executeCommand(cmd);
+    }
+  }
+
+  /// Inserts [count] rows at the current active row.
+  void insertRowAtActive({int count = 1}) {
+    final row = _selection.primaryCell.row;
+    final cmd = InsertRowsCommand(
+      worksheet: activeWorksheet,
+      startRow: row,
+      count: count,
+      engine: _engine,
+      workbook: _workbook,
+    );
+    _executeCommand(cmd);
+  }
+
+  /// Deletes [count] rows starting at the current active row.
+  void deleteRowAtActive({int count = 1}) {
+    final row = _selection.primaryCell.row;
+    final cmd = DeleteRowsCommand(
+      worksheet: activeWorksheet,
+      startRow: row,
+      count: count,
+      engine: _engine,
+      workbook: _workbook,
+    );
+    _executeCommand(cmd);
+  }
+
+  /// Inserts [count] columns at the current active column.
+  void insertColumnAtActive({int count = 1}) {
+    final col = _selection.primaryCell.col;
+    final cmd = InsertColumnsCommand(
+      worksheet: activeWorksheet,
+      startCol: col,
+      count: count,
+      engine: _engine,
+      workbook: _workbook,
+    );
+    _executeCommand(cmd);
+  }
+
+  /// Deletes [count] columns starting at the current active column.
+  void deleteColumnAtActive({int count = 1}) {
+    final col = _selection.primaryCell.col;
+    final cmd = DeleteColumnsCommand(
+      worksheet: activeWorksheet,
+      startCol: col,
+      count: count,
+      engine: _engine,
+      workbook: _workbook,
+    );
+    _executeCommand(cmd);
+  }
+
+  /// Toggles filtering on the active worksheet.
+  void toggleFilter() {
+    final sheet = activeWorksheet;
+    if (sheet.filter != null) {
+      sheet.filter = null;
+      sheet.clearHiddenRows();
+    } else {
+      var range = _selection.activeRange;
+      if (range.isSingleCell) {
+        final maxCol = sheet.maxPopulatedCol;
+        final maxRow = sheet.maxPopulatedRow;
+        if (maxCol >= 0 && maxRow >= 0) {
+          range = CellRange(
+            const CellCoordinate(0, 0),
+            CellCoordinate(maxRow, maxCol),
+          );
+        }
+      }
+      final filter = WorksheetFilter(range: range);
+      sheet.filter = filter;
+    }
+    notifyListeners();
+  }
+
+  /// Applies a column filter criteria to the active worksheet filter.
+  void applyColumnFilter(int colIndex, ColumnFilterCriteria criteria) {
+    final sheet = activeWorksheet;
+    var filter = sheet.filter as WorksheetFilter?;
+    if (filter == null) {
+      toggleFilter();
+      filter = sheet.filter as WorksheetFilter?;
+    }
+    if (filter != null) {
+      filter.setColumnFilter(colIndex, criteria);
+      filter.apply(sheet);
+      notifyListeners();
+    }
+  }
+
+  /// Clears filter criteria from [colIndex].
+  void clearColumnFilter(int colIndex) {
+    final sheet = activeWorksheet;
+    final filter = sheet.filter as WorksheetFilter?;
+    if (filter != null) {
+      filter.clearColumnFilter(colIndex);
+      filter.apply(sheet);
+      notifyListeners();
+    }
+  }
+
+  /// Clears all column filter criteria while keeping filter enabled.
+  void clearAllFilters() {
+    final sheet = activeWorksheet;
+    final filter = sheet.filter as WorksheetFilter?;
+    if (filter != null) {
+      filter.clearAll();
+      filter.apply(sheet);
+      notifyListeners();
+    }
+  }
+
+  /// Sets the frozen rows and columns on the active worksheet.
+  void setFreezePanes({int rows = 0, int cols = 0}) {
+    activeWorksheet.freezePanes(rows: rows, cols: cols);
+    notifyListeners();
+  }
+
+  /// Unfreezes all rows and columns on the active worksheet.
+  void unfreezePanes() {
+    activeWorksheet.unfreezePanes();
+    notifyListeners();
+  }
+
   // ---------------------------------------------------------------------------
   // Worksheet Operations (Routed through CommandStack)
   // ---------------------------------------------------------------------------
@@ -314,9 +467,12 @@ class WorkbookState extends ChangeNotifier {
     _executeCommand(command);
   }
 
-  void _executeCommand(Command command) {
+  /// Executes [command] on the command stack and notifies listeners.
+  void executeCommand(Command command) {
     _commandStack.execute(command);
     _isDirty = true;
     notifyListeners();
   }
+
+  void _executeCommand(Command command) => executeCommand(command);
 }

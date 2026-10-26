@@ -55,9 +55,7 @@ void main() {
 
     test('undo restores previous cell state', () {
       // Pre-populate a cell
-      sheet.setCell(
-        CellModel.fromInput(const CellCoordinate(0, 0), 'OLD'),
-      );
+      sheet.setCell(CellModel.fromInput(const CellCoordinate(0, 0), 'OLD'));
 
       final cmd = BatchImportCommand(
         worksheet: sheet,
@@ -154,9 +152,7 @@ void main() {
 
       expect(state.isDirty, isTrue);
       expect(
-        state.activeWorksheet
-            .getCell(const CellCoordinate(0, 0))
-            ?.rawInput,
+        state.activeWorksheet.getCell(const CellCoordinate(0, 0))?.rawInput,
         'Hello',
       );
     });
@@ -173,10 +169,7 @@ void main() {
       expect(state.canUndo, isTrue);
 
       state.undo();
-      expect(
-        state.activeWorksheet.getCell(const CellCoordinate(0, 0)),
-        isNull,
-      );
+      expect(state.activeWorksheet.getCell(const CellCoordinate(0, 0)), isNull);
     });
   });
 

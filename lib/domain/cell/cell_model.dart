@@ -115,6 +115,9 @@ class Cell {
     return computedValue.displayString;
   }
 
+  /// Convenient alias for [formattedText].
+  String get displayValue => formattedText;
+
   /// Helper to format numeric values based on [CellNumberFormat].
   static String _formatNumber(num value, CellNumberFormat format) {
     switch (format.type) {

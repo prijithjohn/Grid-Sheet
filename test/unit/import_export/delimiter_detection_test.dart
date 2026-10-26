@@ -25,8 +25,7 @@ Carol,35,Paris,France,carol@example.com
     });
 
     test('semicolon-separated European locale data', () {
-      const sample =
-          'Artikel;Preis;Menge\nApfel;1,20;50\nBanane;0,80;100';
+      const sample = 'Artikel;Preis;Menge\nApfel;1,20;50\nBanane;0,80;100';
       final result = engine.detectDelimiter(sample);
       expect(result.delimiter, CsvDelimiter.semicolon);
     });
@@ -77,10 +76,7 @@ Robert,Brown,HR,70000
     test('maxLines parameter limits analysis to N lines', () {
       // First 2 lines use semicolons, rest use commas — with maxLines=2 should pick semicolon
       final lines = ['a;b;c', 'x;y;z', 'p,q,r', 's,t,u', 'm,n,o'];
-      final result = engine.detectDelimiter(
-        lines.join('\n'),
-        maxLines: 2,
-      );
+      final result = engine.detectDelimiter(lines.join('\n'), maxLines: 2);
       expect(result.delimiter, CsvDelimiter.semicolon);
     });
 
