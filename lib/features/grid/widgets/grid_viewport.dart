@@ -120,60 +120,24 @@ class _GridViewportState extends State<GridViewport> {
     final frozenCols = worksheet.frozenCols;
     final frozenRows = worksheet.frozenRows;
 
-    // Check frozen columns first
-    double currentX = 0;
-    int col = 0;
-    bool inFrozenCol = false;
-    while (col < frozenCols) {
-      final width = worksheet.getColumnWidth(col);
-      if (localOffset.dx >= currentX && localOffset.dx < currentX + width) {
-        inFrozenCol = true;
-        break;
-      }
-      currentX += width;
-      col++;
-    }
-
-    if (!inFrozenCol) {
+    int col;
+    final frozenWidth = worksheet.getColumnOffset(frozenCols);
+    if (frozenCols > 0 && localOffset.dx < frozenWidth) {
+      col = worksheet.getColumnAtOffset(localOffset.dx);
+      if (col >= frozenCols) col = frozenCols - 1;
+    } else {
       final targetX = localOffset.dx + _scrollX;
-      currentX = 0;
-      col = 0;
-      while (col < CellCoordinate.maxCols) {
-        final width = worksheet.getColumnWidth(col);
-        if (targetX >= currentX && targetX < currentX + width) break;
-        currentX += width;
-        col++;
-      }
+      col = worksheet.getColumnAtOffset(targetX);
     }
 
-    // Check frozen rows first
-    double currentY = 0;
-    int row = 0;
-    bool inFrozenRow = false;
-    while (row < frozenRows) {
-      final height = worksheet.getRowHeight(row);
-      if (height > 0 &&
-          localOffset.dy >= currentY &&
-          localOffset.dy < currentY + height) {
-        inFrozenRow = true;
-        break;
-      }
-      currentY += height;
-      row++;
-    }
-
-    if (!inFrozenRow) {
+    int row;
+    final frozenHeight = worksheet.getRowOffset(frozenRows);
+    if (frozenRows > 0 && localOffset.dy < frozenHeight) {
+      row = worksheet.getRowAtOffset(localOffset.dy);
+      if (row >= frozenRows) row = frozenRows - 1;
+    } else {
       final targetY = localOffset.dy + _scrollY;
-      currentY = 0;
-      row = 0;
-      while (row < CellCoordinate.maxRows) {
-        final height = worksheet.getRowHeight(row);
-        if (height > 0 && targetY >= currentY && targetY < currentY + height) {
-          break;
-        }
-        currentY += height;
-        row++;
-      }
+      row = worksheet.getRowAtOffset(targetY);
     }
 
     if (col < CellCoordinate.maxCols && row < CellCoordinate.maxRows) {
@@ -185,16 +149,10 @@ class _GridViewportState extends State<GridViewport> {
   Rect _getCellRect(CellCoordinate coord) {
     final worksheet = widget.state.activeWorksheet;
 
-    double x = 0;
-    for (int c = 0; c < coord.col; c++) {
-      x += worksheet.getColumnWidth(c);
-    }
+    final x = worksheet.getColumnOffset(coord.col);
     final width = worksheet.getColumnWidth(coord.col);
 
-    double y = 0;
-    for (int r = 0; r < coord.row; r++) {
-      y += worksheet.getRowHeight(r);
-    }
+    final y = worksheet.getRowOffset(coord.row);
     final height = worksheet.getRowHeight(coord.row);
 
     final offsetX = coord.col < worksheet.frozenCols ? x : x - _scrollX;
@@ -207,15 +165,18 @@ class _GridViewportState extends State<GridViewport> {
   Widget build(BuildContext context) {
     final worksheet = widget.state.activeWorksheet;
 
-    // Estimate total virtual dimensions (first 100 columns and 500 rows for scrolling)
-    double totalWidth = 0;
-    for (int c = 0; c < 100; c++) {
-      totalWidth += worksheet.getColumnWidth(c);
-    }
-    double totalHeight = 0;
-    for (int r = 0; r < 500; r++) {
-      totalHeight += worksheet.getRowHeight(r);
-    }
+    // Total virtual dimensions: at least 100 cols and 500 rows, or beyond if populated
+    final maxCols = (worksheet.maxPopulatedCol + 30).clamp(
+      100,
+      CellCoordinate.maxCols,
+    );
+    final maxRows = (worksheet.maxPopulatedRow + 100).clamp(
+      500,
+      CellCoordinate.maxRows,
+    );
+
+    final totalWidth = worksheet.getColumnOffset(maxCols);
+    final totalHeight = worksheet.getRowOffset(maxRows);
 
     return LayoutBuilder(
       builder: (context, constraints) {

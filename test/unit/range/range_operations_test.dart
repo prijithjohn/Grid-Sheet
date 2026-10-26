@@ -19,10 +19,10 @@ void main() {
       // Row 0 has formula =A1*2 in B1
       sheet.setCell(Cell.fromInput(const CellCoordinate(0, 0), '10'));
       sheet.setCell(
-        Cell(
-          coordinate: const CellCoordinate(0, 1),
+        const Cell(
+          coordinate: CellCoordinate(0, 1),
           rawInput: '=A1*2',
-          style: const CellStyle(isBold: true),
+          style: CellStyle(isBold: true),
         ),
       );
 
@@ -56,10 +56,10 @@ void main() {
     test('FillRightCommand fills right and adjusts relative references', () {
       // A1 has formula =A2+1
       sheet.setCell(
-        Cell(
-          coordinate: const CellCoordinate(0, 0),
+        const Cell(
+          coordinate: CellCoordinate(0, 0),
           rawInput: '=A2+1',
-          style: const CellStyle(isItalic: true),
+          style: CellStyle(isItalic: true),
         ),
       );
 
@@ -91,10 +91,10 @@ void main() {
     test('DuplicateRangeCommand duplicates range with reference shift', () {
       sheet.setCell(Cell.fromInput(const CellCoordinate(0, 0), '100'));
       sheet.setCell(
-        Cell(
-          coordinate: const CellCoordinate(0, 1),
+        const Cell(
+          coordinate: CellCoordinate(0, 1),
           rawInput: '=A1*2',
-          style: const CellStyle(isUnderline: true),
+          style: CellStyle(isUnderline: true),
         ),
       );
 
@@ -128,7 +128,7 @@ void main() {
       sheet.setCell(Cell.fromInput(const CellCoordinate(0, 0), '10'));
       sheet.setCell(Cell.fromInput(const CellCoordinate(1, 0), '20'));
       sheet.setCell(
-        Cell(coordinate: const CellCoordinate(2, 0), rawInput: '=A1+A2'),
+        const Cell(coordinate: CellCoordinate(2, 0), rawInput: '=A1+A2'),
       );
 
       // Insert 1 row at index 1 (between row 0 and row 1)
@@ -165,7 +165,7 @@ void main() {
         sheet.setCell(Cell.fromInput(const CellCoordinate(1, 0), '20'));
         sheet.setCell(Cell.fromInput(const CellCoordinate(2, 0), '30'));
         sheet.setCell(
-          Cell(coordinate: const CellCoordinate(3, 0), rawInput: '=A1+A2+A3'),
+          const Cell(coordinate: CellCoordinate(3, 0), rawInput: '=A1+A2+A3'),
         );
 
         // Delete Row index 1 (A2)
@@ -205,7 +205,7 @@ void main() {
       sheet.setCell(Cell.fromInput(const CellCoordinate(0, 0), '10'));
       sheet.setCell(Cell.fromInput(const CellCoordinate(0, 1), '20'));
       sheet.setCell(
-        Cell(coordinate: const CellCoordinate(0, 2), rawInput: '=A1+B1'),
+        const Cell(coordinate: CellCoordinate(0, 2), rawInput: '=A1+B1'),
       );
 
       // Insert column at B (index 1)
@@ -237,7 +237,7 @@ void main() {
         sheet.setCell(Cell.fromInput(const CellCoordinate(0, 0), '10'));
         sheet.setCell(Cell.fromInput(const CellCoordinate(0, 1), '20'));
         sheet.setCell(
-          Cell(coordinate: const CellCoordinate(0, 2), rawInput: '=A1+B1'),
+          const Cell(coordinate: CellCoordinate(0, 2), rawInput: '=A1+B1'),
         );
 
         // Delete Column B (index 1)

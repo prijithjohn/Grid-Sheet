@@ -25,17 +25,17 @@ class SelectionPainter extends CustomPainter {
 
     // Calculate selection bounding box in pixel coordinates
     final startX = range.start.col < worksheet.frozenCols
-        ? _getColumnOffset(range.start.col)
-        : _getColumnOffset(range.start.col) - scrollX;
+        ? worksheet.getColumnOffset(range.start.col)
+        : worksheet.getColumnOffset(range.start.col) - scrollX;
     final endX = range.end.col < worksheet.frozenCols
-        ? _getColumnOffset(range.end.col + 1)
-        : _getColumnOffset(range.end.col + 1) - scrollX;
+        ? worksheet.getColumnOffset(range.end.col + 1)
+        : worksheet.getColumnOffset(range.end.col + 1) - scrollX;
     final startY = range.start.row < worksheet.frozenRows
-        ? _getRowOffset(range.start.row)
-        : _getRowOffset(range.start.row) - scrollY;
+        ? worksheet.getRowOffset(range.start.row)
+        : worksheet.getRowOffset(range.start.row) - scrollY;
     final endY = range.end.row < worksheet.frozenRows
-        ? _getRowOffset(range.end.row + 1)
-        : _getRowOffset(range.end.row + 1) - scrollY;
+        ? worksheet.getRowOffset(range.end.row + 1)
+        : worksheet.getRowOffset(range.end.row + 1) - scrollY;
 
     final rect = Rect.fromLTRB(startX, startY, endX, endY);
 
@@ -64,22 +64,6 @@ class SelectionPainter extends CustomPainter {
       height: AppDimensions.autofillHandleSize,
     );
     canvas.drawRect(handleRect, handlePaint);
-  }
-
-  double _getColumnOffset(int targetCol) {
-    double offset = 0;
-    for (int c = 0; c < targetCol; c++) {
-      offset += worksheet.getColumnWidth(c);
-    }
-    return offset;
-  }
-
-  double _getRowOffset(int targetRow) {
-    double offset = 0;
-    for (int r = 0; r < targetRow; r++) {
-      offset += worksheet.getRowHeight(r);
-    }
-    return offset;
   }
 
   @override

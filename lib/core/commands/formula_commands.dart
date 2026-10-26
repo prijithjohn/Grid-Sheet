@@ -119,20 +119,33 @@ class ClearFormulaRangeCommand extends Command {
       _executedOnce = true;
     }
 
-    // Remove each cell in the range through the engine
-    for (final coord in range.coordinates) {
-      engine.removeCell(worksheet, coord, workbook: workbook);
+    // Only remove populated cells within the target range
+    final populatedCoords = worksheet
+        .getPopulatedCellsInRange(range)
+        .map((c) => c.coordinate)
+        .toList();
+
+    for (final coord in populatedCoords) {
+      if (engine.dependencyGraph.hasFormula(coord)) {
+        engine.dependencyGraph.removeFormula(coord);
+      }
+      worksheet.removeCell(coord);
+    }
+
+    if (populatedCoords.isNotEmpty) {
+      engine.recalculateDependents(
+        worksheet,
+        populatedCoords,
+        workbook: workbook,
+      );
     }
   }
 
   @override
   void undo() {
-    // Clear current state
-    for (final coord in List.of(
-      worksheet.populatedCells.map((c) => c.coordinate),
-    )) {
-      worksheet.removeCell(coord);
-    }
+    // Clear populated cells
+    worksheet.clearCells();
+
     for (final coord in engine.dependencyGraph.formulaCells.toList()) {
       engine.dependencyGraph.removeFormula(coord);
     }

@@ -23,6 +23,8 @@ class LoadResult {
 
   const LoadResult.success(this.workbook) : errorMessage = null;
   const LoadResult.failure(this.errorMessage) : workbook = null;
+
+  bool get isSuccess => workbook != null;
 }
 
 /// Metadata about a pending recovery file.
@@ -82,6 +84,11 @@ class WorkbookPersistence {
       final content = _serializer.encode(workbook);
       final tmpFile = File(tmpPath);
       await tmpFile.writeAsString(content, encoding: utf8, flush: true);
+
+      final targetFile = File(filePath);
+      if (Platform.isWindows && await targetFile.exists()) {
+        await targetFile.delete();
+      }
       await tmpFile.rename(filePath);
       return const PersistenceResult.success();
     } catch (e) {
