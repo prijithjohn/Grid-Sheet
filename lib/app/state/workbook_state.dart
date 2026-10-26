@@ -15,14 +15,17 @@ class WorkbookState extends ChangeNotifier {
     CommandStack? commandStack,
     SelectionState? initialSelection,
     String? filePath,
+    FormulaEngine? formulaEngine,
   }) : _workbook = initialWorkbook ?? Workbook.createDefault(),
        _commandStack = commandStack ?? CommandStack(),
-       _selection = initialSelection ?? SelectionState.initial {
+       _selection = initialSelection ?? SelectionState.initial,
+       _engine = formulaEngine ?? FormulaEngine() {
     _filePath = filePath;
   }
 
   Workbook _workbook;
   final CommandStack _commandStack;
+  final FormulaEngine _engine;
   SelectionState _selection;
   String? _filePath;
   bool _isDirty = false;
@@ -69,6 +72,9 @@ class WorkbookState extends ChangeNotifier {
   /// The raw input string of the active cell, or empty string if empty.
   String get activeCellInput => activeCell?.rawInput ?? '';
 
+  /// The formula engine managing formula evaluation and dependencies.
+  FormulaEngine get formulaEngine => _engine;
+
   /// Formatted A1 address string of the active cell cursor (e.g. "B2").
   String get activeCellAddress => _selection.primaryCell.a1;
 
@@ -89,21 +95,25 @@ class WorkbookState extends ChangeNotifier {
     editCellAt(_selection.primaryCell, input);
   }
 
-  /// Edits the text of the cell at [coordinate].
+  /// Edits the text of the cell at [coordinate] and evaluates formulas.
   void editCellAt(CellCoordinate coordinate, String input) {
-    final cmd = SetCellTextCommand(
+    final cmd = SetFormulaCommand(
+      engine: _engine,
       worksheet: activeWorksheet,
       coordinate: coordinate,
-      newText: input,
+      newInput: input,
+      workbook: _workbook,
     );
     _executeCommand(cmd);
   }
 
   /// Clears all cells within the current active selection range.
   void clearSelection() {
-    final cmd = ClearRangeCommand(
+    final cmd = ClearFormulaRangeCommand(
+      engine: _engine,
       worksheet: activeWorksheet,
       range: _selection.activeRange,
+      workbook: _workbook,
     );
     _executeCommand(cmd);
   }
@@ -238,6 +248,8 @@ class WorkbookState extends ChangeNotifier {
   bool undo() {
     final undone = _commandStack.undo();
     if (undone != null) {
+      // After undo, recalculate all formulas in context to ensure consistency
+      _engine.recalculateAll(activeWorksheet, workbook: _workbook);
       _isDirty = true;
       notifyListeners();
       return true;
@@ -249,6 +261,8 @@ class WorkbookState extends ChangeNotifier {
   bool redo() {
     final redone = _commandStack.redo();
     if (redone != null) {
+      // After redo, recalculate all formulas in context to ensure consistency
+      _engine.recalculateAll(activeWorksheet, workbook: _workbook);
       _isDirty = true;
       notifyListeners();
       return true;
@@ -263,6 +277,8 @@ class WorkbookState extends ChangeNotifier {
     _filePath = filePath;
     _isDirty = false;
     _commandStack.clear();
+    // Re-register and evaluate all formula cells in new workbook's active sheet
+    _engine.recalculateAll(workbook.activeSheet, workbook: workbook);
     notifyListeners();
   }
 
