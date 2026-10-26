@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../core/commands/commands.dart';
+import '../../data/import_export/csv_service.dart' show BatchImportCommand;
 import '../../domain/domain.dart';
 import 'selection_state.dart';
 
@@ -295,6 +296,22 @@ class WorkbookState extends ChangeNotifier {
   void setFilePath(String? path) {
     _filePath = path;
     notifyListeners();
+  }
+
+  /// Executes a [BatchImportCommand] as a single undoable step.
+  ///
+  /// Used by [CsvService] and [ClipboardManager] to perform multi-cell
+  /// imports while keeping the undo stack coherent.
+  void executeBatchImport(BatchImportCommand command) {
+    _executeCommand(command);
+  }
+
+  /// Clears the active sheet and then executes [command] as one compound step.
+  ///
+  /// Used for "Replace Active Sheet" import mode.
+  void clearAndImport(BatchImportCommand command) {
+    activeWorksheet.clear();
+    _executeCommand(command);
   }
 
   void _executeCommand(Command command) {

@@ -18,6 +18,12 @@ class RibbonBar extends StatefulWidget {
     this.onOpen,
     this.onSave,
     this.onSaveAs,
+    this.onCopy,
+    this.onCut,
+    this.onPaste,
+    this.onImportCsv,
+    this.onExportCsv,
+    this.onExportTsv,
   });
 
   final WorkbookState state;
@@ -25,6 +31,12 @@ class RibbonBar extends StatefulWidget {
   final VoidCallback? onOpen;
   final VoidCallback? onSave;
   final VoidCallback? onSaveAs;
+  final VoidCallback? onCopy;
+  final VoidCallback? onCut;
+  final VoidCallback? onPaste;
+  final VoidCallback? onImportCsv;
+  final VoidCallback? onExportCsv;
+  final VoidCallback? onExportTsv;
 
   @override
   State<RibbonBar> createState() => _RibbonBarState();
@@ -152,19 +164,19 @@ class _RibbonBarState extends State<RibbonBar> {
                             icon: Icons.content_paste,
                             label: 'Paste',
                             tooltip: 'Paste (Ctrl+V)',
-                            onPressed: () {},
+                            onPressed: widget.onPaste ?? () {},
                           ),
                           _RibbonActionButton(
                             icon: Icons.content_cut,
                             label: 'Cut',
                             tooltip: 'Cut (Ctrl+X)',
-                            onPressed: () {},
+                            onPressed: widget.onCut ?? () {},
                           ),
                           _RibbonActionButton(
                             icon: Icons.content_copy,
                             label: 'Copy',
                             tooltip: 'Copy (Ctrl+C)',
-                            onPressed: () {},
+                            onPressed: widget.onCopy ?? () {},
                           ),
 
                           _RibbonDivider(),
@@ -304,6 +316,28 @@ class _RibbonBarState extends State<RibbonBar> {
           label: 'Save As',
           tooltip: 'Save As (Ctrl+Shift+S)',
           onPressed: widget.onSaveAs,
+        ),
+        _RibbonDivider(),
+        _RibbonActionButton(
+          key: const Key('ribbon_file_import_csv_button'),
+          icon: Icons.upload_file_outlined,
+          label: 'Import CSV',
+          tooltip: 'Import CSV / TSV File',
+          onPressed: widget.onImportCsv,
+        ),
+        _RibbonActionButton(
+          key: const Key('ribbon_file_export_csv_button'),
+          icon: Icons.download_outlined,
+          label: 'Export CSV',
+          tooltip: 'Export Active Sheet as CSV',
+          onPressed: widget.onExportCsv,
+        ),
+        _RibbonActionButton(
+          key: const Key('ribbon_file_export_tsv_button'),
+          icon: Icons.table_rows_outlined,
+          label: 'Export TSV',
+          tooltip: 'Export Active Sheet as TSV',
+          onPressed: widget.onExportTsv,
         ),
       ],
     );

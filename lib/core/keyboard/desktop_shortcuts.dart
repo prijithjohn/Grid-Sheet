@@ -61,6 +61,18 @@ class NewWorkbookIntent extends Intent {
   const NewWorkbookIntent();
 }
 
+class CopyIntent extends Intent {
+  const CopyIntent();
+}
+
+class CutIntent extends Intent {
+  const CutIntent();
+}
+
+class PasteIntent extends Intent {
+  const PasteIntent();
+}
+
 /// Wraps children with spreadsheet desktop keyboard shortcut listeners.
 class DesktopShortcuts extends StatelessWidget {
   const DesktopShortcuts({
@@ -71,6 +83,9 @@ class DesktopShortcuts extends StatelessWidget {
     this.onSaveAs,
     this.onOpen,
     this.onNew,
+    this.onCopy,
+    this.onCut,
+    this.onPaste,
   });
 
   final WorkbookState state;
@@ -79,6 +94,9 @@ class DesktopShortcuts extends StatelessWidget {
   final VoidCallback? onSaveAs;
   final VoidCallback? onOpen;
   final VoidCallback? onNew;
+  final VoidCallback? onCopy;
+  final VoidCallback? onCut;
+  final VoidCallback? onPaste;
 
   @override
   Widget build(BuildContext context) {
@@ -153,6 +171,11 @@ class DesktopShortcuts extends StatelessWidget {
         SingleActivator(LogicalKeyboardKey.keyO, control: true): OpenIntent(),
         SingleActivator(LogicalKeyboardKey.keyN, control: true):
             NewWorkbookIntent(),
+
+        // Clipboard
+        SingleActivator(LogicalKeyboardKey.keyC, control: true): CopyIntent(),
+        SingleActivator(LogicalKeyboardKey.keyX, control: true): CutIntent(),
+        SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteIntent(),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
@@ -242,6 +265,24 @@ class DesktopShortcuts extends StatelessWidget {
           NewWorkbookIntent: CallbackAction<NewWorkbookIntent>(
             onInvoke: (_) {
               onNew?.call();
+              return null;
+            },
+          ),
+          CopyIntent: CallbackAction<CopyIntent>(
+            onInvoke: (_) {
+              onCopy?.call();
+              return null;
+            },
+          ),
+          CutIntent: CallbackAction<CutIntent>(
+            onInvoke: (_) {
+              onCut?.call();
+              return null;
+            },
+          ),
+          PasteIntent: CallbackAction<PasteIntent>(
+            onInvoke: (_) {
+              onPaste?.call();
               return null;
             },
           ),
