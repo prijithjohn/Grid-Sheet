@@ -7,4 +7,5 @@ library;
 export 'cell_commands.dart';
 export 'command.dart';
 export 'command_stack.dart';
+export 'formula_commands.dart';
 export 'worksheet_commands.dart';

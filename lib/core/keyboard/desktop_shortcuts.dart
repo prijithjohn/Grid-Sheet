@@ -33,6 +33,18 @@ class ExtendSelectionIntent extends Intent {
   final int colDelta;
 }
 
+class ToggleBoldIntent extends Intent {
+  const ToggleBoldIntent();
+}
+
+class ToggleItalicIntent extends Intent {
+  const ToggleItalicIntent();
+}
+
+class ToggleUnderlineIntent extends Intent {
+  const ToggleUnderlineIntent();
+}
+
 /// Wraps children with spreadsheet desktop keyboard shortcut listeners.
 class DesktopShortcuts extends StatelessWidget {
   const DesktopShortcuts({super.key, required this.state, required this.child});
@@ -97,6 +109,11 @@ class DesktopShortcuts extends StatelessWidget {
             ExtendSelectionIntent(rowDelta: 0, colDelta: -1),
         SingleActivator(LogicalKeyboardKey.arrowRight, shift: true):
             ExtendSelectionIntent(rowDelta: 0, colDelta: 1),
+
+        // Formatting
+        SingleActivator(LogicalKeyboardKey.keyB, control: true): ToggleBoldIntent(),
+        SingleActivator(LogicalKeyboardKey.keyI, control: true): ToggleItalicIntent(),
+        SingleActivator(LogicalKeyboardKey.keyU, control: true): ToggleUnderlineIntent(),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
@@ -135,6 +152,33 @@ class DesktopShortcuts extends StatelessWidget {
                 CellCoordinate.maxCols - 1,
               );
               state.extendSelection(active.copyWith(row: newRow, col: newCol));
+              return null;
+            },
+          ),
+          ToggleBoldIntent: CallbackAction<ToggleBoldIntent>(
+            onInvoke: (_) {
+              state.applyStyleToSelection(
+                (curr) => curr.copyWith(isBold: !curr.isBold),
+                description: 'Toggle Bold',
+              );
+              return null;
+            },
+          ),
+          ToggleItalicIntent: CallbackAction<ToggleItalicIntent>(
+            onInvoke: (_) {
+              state.applyStyleToSelection(
+                (curr) => curr.copyWith(isItalic: !curr.isItalic),
+                description: 'Toggle Italic',
+              );
+              return null;
+            },
+          ),
+          ToggleUnderlineIntent: CallbackAction<ToggleUnderlineIntent>(
+            onInvoke: (_) {
+              state.applyStyleToSelection(
+                (curr) => curr.copyWith(isUnderline: !curr.isUnderline),
+                description: 'Toggle Underline',
+              );
               return null;
             },
           ),
